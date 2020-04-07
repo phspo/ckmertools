@@ -10,7 +10,10 @@ This software requires boost, jsoncpp and makes use of Vitaliy Vitsentiy's excel
 
 `
     mkdir build
+    
     cd build
+    
     cmake ../
+    
     make
 `
