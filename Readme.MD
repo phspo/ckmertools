@@ -9,8 +9,8 @@ ckmertools is a c++ based application used for k-mer based typing (mostly aimed 
 This software requires boost, jsoncpp and makes use of Vitaliy Vitsentiy's excellent ctpl.h library.
 
 `
-mkdir build \
-cd build \
-cmake ../ \
-make \
+mkdir build
+cd build
+cmake ../
+make
 `
