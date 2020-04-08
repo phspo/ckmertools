@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "logsystem.h"
 #include "parsing.h"
 #include "probabilistic.h"
@@ -46,7 +47,7 @@ int main(int argc, char* argv[]) {
 
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
-
+            auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
 
             float kmerError = vm["kmererror"].as<float>();
 
@@ -63,7 +64,7 @@ int main(int argc, char* argv[]) {
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff =  vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
-                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCounts,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";
@@ -92,6 +93,8 @@ int main(int argc, char* argv[]) {
         else if (vm["m"].as<int>() == 1) {
             Json::Value sequenceProfiles = parsing::readDictionary(vm["profiles"].as<std::string>());
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
+            
+            auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
 
             std::map<std::string,double> likelihoods;
 
@@ -116,7 +119,7 @@ int main(int argc, char* argv[]) {
                 //std::cout << "Calculating spa Type: " << spaType.key().asString()+ "\n";
                 if (spaType->getMemberNames().size() > 0){
                     //probabilistic::GenerativeResult result = probabilistic::calculateLikelihoodGenerative(idx,observedCounts,*spaType,baseErrorRate,hdLikelihoods);
-                    results[idx] = p.push(probabilistic::calculateLikelihoodGenerative,observedCounts,*spaType,baseErrorRate,hdLikelihoods);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodGenerative,observedCountsPointer,*spaType,baseErrorRate,hdLikelihoods);
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";

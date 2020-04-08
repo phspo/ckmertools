@@ -30,7 +30,7 @@ namespace probabilistic {
 
     CoverageBasedResult calculateLikelihoodCoverageBased(
             int threadID,
-            const Json::Value &observedCounts,
+            const std::shared_ptr<Json::Value> observedCountsPointer,
             const Json::Value &expectedCounts,
             const float &kmerError,
             const std::string spaTypeName,
@@ -39,7 +39,7 @@ namespace probabilistic {
 
     GenerativeResult calculateLikelihoodGenerative(
             int threadID,
-            const Json::Value &observedCounts,
+            const std::shared_ptr<Json::Value> observedCountsPointer,
             const Json::Value &sequenceProfile,
             const float &baseErrorRate,
             const double* hdLikelihoods

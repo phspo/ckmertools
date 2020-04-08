@@ -21,12 +21,16 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
 
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
         const int threadID,
-        const Json::Value &observedCounts,
+        const std::shared_ptr<Json::Value> observedCountsPointer,
         const Json::Value &expectedCounts,
         const float &kmerError,
         const std::string spaTypeName,
         const int deviationCutoff
         ){
+
+    //std::cout << "Pointer: " << observedCountsPointer << std::endl;
+
+    Json::Value observedCounts = *observedCountsPointer.get();
 
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
 
@@ -160,12 +164,13 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
 probabilistic::GenerativeResult probabilistic::calculateLikelihoodGenerative(
         const int threadID,
-        const Json::Value &observedCounts,
+        const std::shared_ptr<Json::Value> observedCountsPointer,
         const Json::Value &sequenceProfile,
         const float &baseErrorRate,
         const double* hdLikelihoods)
          {
 
+    Json::Value observedCounts = *observedCountsPointer.get();
 
     GenerativeResult result;
 
