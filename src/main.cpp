@@ -141,11 +141,11 @@ int main(int argc, char* argv[]) {
             parsing::writeDictionary(likelihoods,vm["target"].as<std::string>());
         }
         else{
-            std::cout << "Illegal Mode ... \n";
+            BOOST_LOG_TRIVIAL(error) << "Illegal Mode ... \n";
         }
     }
     catch (const error &ex)
     {
-        std::cerr << ex.what() << '\n';
+        BOOST_LOG_TRIVIAL(error) << ex.what() << '\n';
     }
 }
