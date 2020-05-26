@@ -1,6 +1,6 @@
 # About
 
-ckmertools is a c++ based application used for k-mer based typing (mostly aimed at spa-typing).
+ckmertools is a c++ based application used for k-mer based genotyping (mostly aimed at spa-typing) using two bayesian models.
 
 
 
