@@ -85,7 +85,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         sumOfObservedCounts += kmer->asInt();
     }
 
-    # TODO: needs to be adjusted to Iterationsets
+    // TODO: needs to be adjusted to Iterationsets
     float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
 
     unsigned int expectedErrors = sumOfObservedCounts * kmerError;
