@@ -47,10 +47,7 @@ int main(int argc, char* argv[]) {
 
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
-            Json::Value iterationCounts = parsing::readDictionary(vm["iterationset"].as<std::string>());
             auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
-            auto iterationCountsPointer = std::make_shared<Json::Value>(iterationCounts);
-
 
             float kmerError = vm["kmererror"].as<float>();
 
@@ -67,7 +64,7 @@ int main(int argc, char* argv[]) {
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff =  vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
-                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer, iterationCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";

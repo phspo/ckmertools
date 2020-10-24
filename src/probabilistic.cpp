@@ -22,7 +22,6 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
         const int threadID,
         const std::shared_ptr<Json::Value> observedCountsPointer,
-        const std::shared_ptr<Json::Value> iterationCountsPointer,
         const Json::Value &expectedCounts,
         const float &kmerError,
         const std::string spaTypeName,
@@ -32,7 +31,6 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     //std::cout << "Pointer: " << observedCountsPointer << std::endl;
 
     Json::Value observedCounts = *observedCountsPointer.get();
-    Json::Value iterationCounts = *iterationCountsPointer.get();
 
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
 
@@ -45,11 +43,6 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     std::unordered_set<std::string> observedKmers;
     for(Json::Value::const_iterator kmer=observedCounts.begin(); kmer!=observedCounts.end(); ++kmer) {
         observedKmers.insert(kmer.key().asString());
-    }
-
-    std::unordered_set<std::string> iterationKmers;
-    for (Json::Value::const_iterator kmer = iterationCounts.begin(); kmer != iterationCounts.end(); ++kmer) {
-        iterationKmers.insert(kmer.key().asString());
     }
 
     std::unordered_set<std::string> expectedKmers;
@@ -71,7 +64,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
 
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    for(std::unordered_set<std::string>::const_iterator kmer= iterationKmers.begin(); kmer!= iterationKmers.end(); ++kmer) {
+    for(std::unordered_set<std::string>::const_iterator kmer=expectedKmers.begin(); kmer!=expectedKmers.end(); ++kmer) {
         if (observedKmers.find(*kmer) == observedKmers.end()){ //not found
             result.likelihood = NAN;
             result.errorLikelihood = NAN;
@@ -85,7 +78,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         sumOfObservedCounts += kmer->asInt();
     }
 
-    // TODO: needs to be adjusted to Iterationsets
+
     float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
 
     unsigned int expectedErrors = sumOfObservedCounts * kmerError;
@@ -95,7 +88,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
 
     //Calculate likelihoods
-    for(std::unordered_set<std::string>::const_iterator kmer= iterationSet.begin(); kmer!=iterationSet.end(); ++kmer) {
+    for(std::unordered_set<std::string>::const_iterator kmer=observedKmers.begin(); kmer!=observedKmers.end(); ++kmer) {
 
 
 
