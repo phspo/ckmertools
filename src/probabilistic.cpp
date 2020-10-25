@@ -25,7 +25,9 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         const Json::Value &expectedCounts,
         const float &kmerError,
         const std::string spaTypeName,
-        const int deviationCutoff
+        const int deviationCutoff,
+        const std::shared_ptr<std::unordered_set<std::string>> OPointer,
+        const std::shared_ptr<std::unordered_set<std::string>> itersetPointer
         ){
 
     //std::cout << "Pointer: " << observedCountsPointer << std::endl;
@@ -39,22 +41,22 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     result.likelihood  = 0.0;
     result.errorLikelihood = 0.0;
 
-    //Define sets of observed and expected kmers
-    std::unordered_set<std::string> observedKmers;
-    for(Json::Value::const_iterator kmer=observedCounts.begin(); kmer!=observedCounts.end(); ++kmer) {
-        observedKmers.insert(kmer.key().asString());
-    }
+    // O = observedKmers
+    std::unordered_set<std::string> O = *OPointer;
+    // Iterationset = O or V or both?
+    std::unordered_set<std::string> iterset = *itersetPointer.get();
 
-    std::unordered_set<std::string> expectedKmers;
+    // Si = expectedKmers
+    std::unordered_set<std::string> Si;
     for(Json::Value::const_iterator kmer=expectedCounts.begin(); kmer!=expectedCounts.end(); ++kmer) {
-        expectedKmers.insert(kmer.key().asString());
+        Si.insert(kmer.key().asString());
     }
 
     //Calculate set of assumed error kmers
     std::unordered_set<std::string> assumedErrorKmers;
-    for (std::unordered_set<std::string>::const_iterator kmer = observedKmers.begin(); kmer != observedKmers.end(); kmer++)
+    for (std::unordered_set<std::string>::const_iterator kmer = iterset.begin(); kmer != iterset.end(); kmer++)
     {
-        if (expectedKmers.find(*kmer) != expectedKmers.end()){ //equiv to kmer is expected
+        if (Si.find(*kmer) != Si.end()){ //equiv to kmer is expected
             //we don't want this
         }
         else{
@@ -62,10 +64,10 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         }
     }
 
-
+    // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    for(std::unordered_set<std::string>::const_iterator kmer=expectedKmers.begin(); kmer!=expectedKmers.end(); ++kmer) {
-        if (observedKmers.find(*kmer) == observedKmers.end()){ //not found
+    for(std::unordered_set<std::string>::const_iterator kmer=Si.begin(); kmer!=Si.end(); ++kmer) {
+        if (iterset.find(*kmer) == iterset.end()){ //not found
             result.likelihood = NAN;
             result.errorLikelihood = NAN;
             return result;
@@ -88,7 +90,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
 
     //Calculate likelihoods
-    for(std::unordered_set<std::string>::const_iterator kmer=observedKmers.begin(); kmer!=observedKmers.end(); ++kmer) {
+    for(std::unordered_set<std::string>::const_iterator kmer=iterset.begin(); kmer!=iterset.end(); ++kmer) {
 
 
 
@@ -105,7 +107,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         bool isExpectedKmer = false;
 
         //Use expectation value if available
-        if (expectedKmers.find(*kmer) != expectedKmers.end()){
+        if (Si.find(*kmer) != Si.end()){
             expectedCount = expectedCounts.get(*kmer,-1).asFloat();
             isExpectedKmer = true;
             if (expectedCount == -1){

@@ -9,6 +9,79 @@
 
 using namespace boost::program_options;
 
+enum ItersetOptions {
+    InvalidType,
+    OType,
+    VType,
+    OuVType,
+    OnVType
+};
+
+ItersetOptions resolveItersetOption(std::string input) {
+    if( input == "O" ) return OType;
+    if( input == "V" ) return VType;
+    if( input == "OuV" ) return OuVType;
+    if( input == "OnV" ) return OnVType;
+    return InvalidType;
+}
+
+
+std::shared_ptr<std::unordered_set<std::string>> chooseIterset(std::shared_ptr<std::unordered_set<std::string>> OPointer, Json::Value expectedCounts, std::string itersetType) {
+    //Define sets of all Spatype kmers
+    std::unordered_set <std::string> V;
+    for (Json::Value::const_iterator spaType = expectedCounts.begin(); spaType != expectedCounts.end(); ++spaType) {
+        if (spaType->getMemberNames().size() > 0) {
+            for (Json::Value::const_iterator kmer = (*spaType).begin(); kmer != (*spaType).end(); ++kmer) {
+                V.insert(kmer.key().asString());
+            }
+        }
+    }
+    auto VPointer = std::make_shared<std::unordered_set<std::string>>(V);
+    std::unordered_set<std::string> O = *OPointer;
+
+    /////////////////////////////////////// TEST SETS
+    std::set<std::string> ordO(O.begin(), O.end());
+    std::set<std::string> ordV(V.begin(), V.end());
+    // O Union V
+    std::unordered_set <std::string> OuV;
+    std::set_union(ordO.begin(), ordO.end(), ordV.begin(), ordV.end(), std::inserter(OuV, OuV.begin()));
+
+    // O Intersect V
+    std::unordered_set <std::string> OnV;
+    std::set_intersection(ordO.begin(), ordO.end(), ordV.begin(), ordV.end(), std::inserter(OnV, OnV.begin()));
+
+    std::cout << "Length O: " << O.size() << std::endl;
+    std::cout << "Length V: " << V.size() << std::endl;
+    std::cout << "Length OuV: " << OuV.size() << std::endl;
+    std::cout << "Length OnV: " << OnV.size() << std::endl;
+    /////////////////////////////////////////////
+
+
+    switch( resolveItersetOption(itersetType) )
+    {
+        case OType: {
+            return OPointer;
+        }
+        case VType: {
+            return VPointer;
+        }
+        case OuVType: {
+            auto iterset = std::make_shared<std::unordered_set<std::string>>(OuV);
+            return iterset;
+        }
+        case OnVType: {
+            auto iterset = std::make_shared<std::unordered_set<std::string>>(OnV);
+            return iterset;
+        }
+        default: {
+            return OPointer;
+        }
+    }
+}
+
+
+
+
 int main(int argc, char* argv[]) {
 
     try
@@ -28,6 +101,7 @@ int main(int argc, char* argv[]) {
                 ("m",value<int>()->required(),"Mode, [0] for coverage-based, [1] for generative")
                 ("target,t",value<std::string>()->required(),"Target file")
                 ("unexpected,u",value<std::string>(),"Unexpected kmers file")
+                ("itersetType,i",value<std::string>(),"Iterset Type O, V, OuV or OnV")
         ;
         variables_map vm;
         store(parse_command_line(argc, argv, desc), vm);
@@ -59,12 +133,26 @@ int main(int argc, char* argv[]) {
 
             std::vector<std::future< probabilistic::CoverageBasedResult>> results(expectedCounts.size());
 
+
+            /// HANDLE SETS /////////////////////
+            std::unordered_set <std::string> O;
+            for (Json::Value::const_iterator kmer = observedCounts.begin(); kmer != observedCounts.end(); ++kmer) {
+                O.insert(kmer.key().asString());
+            }
+            std::string itersetType = vm["itersetType"].as<std::string>();
+            auto OPointer = std::make_shared<std::unordered_set<std::string>>(O);
+            std::shared_ptr<std::unordered_set<std::string>> itersetPointer = chooseIterset(OPointer,expectedCounts, itersetType);
+            std::cout << "Length Iterset: " << (*itersetPointer).size() << std::endl;
+            ///////////////////////////////////
+
+
+
             int idx = 0;
             //Distribute tasks
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff =  vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
-                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff,OPointer,itersetPointer);
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";

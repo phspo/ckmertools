@@ -34,7 +34,9 @@ namespace probabilistic {
             const Json::Value &expectedCounts,
             const float &kmerError,
             const std::string spaTypeName,
-            const int deviationCutoff
+            const int deviationCutoff,
+            const std::shared_ptr<std::unordered_set<std::string>> OPointer,
+            const std::shared_ptr<std::unordered_set<std::string>> itersetPointer
     );
 
     GenerativeResult calculateLikelihoodGenerative(
