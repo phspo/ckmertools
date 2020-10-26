@@ -4,6 +4,7 @@
 
 //const bool SKIP_ERRORS = true;
 const bool SINGLE_ERROR_TERM = false;
+const double VIRT_COUNT_NOT_OBSERVED_KMER = 0.000001;
 
 double probabilistic::poisson_pmf(const double k, const double lambda)
 {
@@ -18,6 +19,18 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
     return count;
 }
 
+double get_observation_count(std::string kmer, Json::Value observedCounts) {
+    //Use observation value
+    double observedCount = observedCounts.get(kmer,-1).asDouble();
+    // TODO: Check observedCounts not found = 0.00001? 0 Not possible (err in pmf)
+    if (observedCount == -1){
+        // fallback value (really small)
+        observedCount = VIRT_COUNT_NOT_OBSERVED_KMER;
+        //BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in the observed kmers but should be there, aborting! \n";
+        //throw std::exception();
+    }
+    return observedCount;
+}
 
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
         const int threadID,
@@ -75,12 +88,13 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     }
 
     //Calculate default value for expected counts
-    int sumOfObservedCounts = 0;
+    double sumOfObservedCounts = 0;
     for(Json::Value::const_iterator kmer=observedCounts.begin(); kmer!=observedCounts.end(); ++kmer) {
-        sumOfObservedCounts += kmer->asInt();
+        sumOfObservedCounts += get_observation_count(kmer.key().asString(), observedCounts);
     }
 
 
+    // |O|*e/|Uo|
     float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
 
     unsigned int expectedErrors = sumOfObservedCounts * kmerError;
@@ -92,21 +106,12 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     //Calculate likelihoods
     for(std::unordered_set<std::string>::const_iterator kmer=iterset.begin(); kmer!=iterset.end(); ++kmer) {
 
-
-
-        float expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
-
-
-        //Use observation value
-        int observedCount = observedCounts.get(*kmer,-1).asInt();
-        if (observedCount == -1){
-            BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in the observed kmers but should be there, aborting! \n";
-            throw std::exception();
-        }
+        double observedCount = get_observation_count(*kmer, observedCounts);
 
         bool isExpectedKmer = false;
 
         //Use expectation value if available
+        float expectedCount;
         if (Si.find(*kmer) != Si.end()){
             expectedCount = expectedCounts.get(*kmer,-1).asFloat();
             isExpectedKmer = true;
@@ -116,6 +121,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             }
         }
         else{
+            expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
             observedErrors += 1;
         }
 
