@@ -44,7 +44,6 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         ){
 
     //std::cout << "Pointer: " << observedCountsPointer << std::endl;
-
     Json::Value observedCounts = *observedCountsPointer.get();
 
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
@@ -67,7 +66,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     //Calculate set of assumed error kmers
     std::unordered_set<std::string> assumedErrorKmers;
-    for (std::unordered_set<std::string>::const_iterator kmer = iterset.begin(); kmer != iterset.end(); kmer++)
+    for (std::unordered_set<std::string>::const_iterator kmer = O.begin(); kmer != O.end(); kmer++)
     {
         if (Si.find(*kmer) != Si.end()){ //equiv to kmer is expected
             //we don't want this
@@ -80,7 +79,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
     for(std::unordered_set<std::string>::const_iterator kmer=Si.begin(); kmer!=Si.end(); ++kmer) {
-        if (iterset.find(*kmer) == iterset.end()){ //not found
+        if (O.find(*kmer) == O.end()){ //not found
             result.likelihood = NAN;
             result.errorLikelihood = NAN;
             return result;

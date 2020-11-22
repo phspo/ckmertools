@@ -1,6 +1,10 @@
 /.vs/*
-/build/*
+build/
+buildwsl/
+.vscode/
+.vs/
 /out/*
+CMakeFiles/
 CMakeSettings.json
 cmake-build-debug/
 .idea/
