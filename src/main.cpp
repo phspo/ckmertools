@@ -86,13 +86,13 @@ std::shared_ptr<std::unordered_set<std::string>> chooseIterset(std::shared_ptr<s
 
 // distances_file = "V_kmer_distances.npz";     kmers_idx_file="V_kmers.json"
 std::shared_ptr<std::map<std::string, std::map<std::string, int>>> get_hammingdistances(std::string distances_file, std::string kmers_idx_file) {
-    cnpy::npz_t M = cnpy::npz_load("V_kmer_distances.npz");
+    cnpy::npz_t M = cnpy::npz_load(distances_file);
     std::vector<uint8_t> M_data = M["data"].as_vec<uint8_t>();
     std::vector<int> M_i = M["col"].as_vec<int>();
     std::vector<int> M_j = M["row"].as_vec<int>();
     std::vector<int> M_shape = M["shape"].as_vec<int>();
 
-    Json::Value V_kmers_index_json = parsing::readDictionary("V_kmers.json");
+    Json::Value V_kmers_index_json = parsing::readDictionary(kmers_idx_file);
     std::vector<std::string> V_kmers_index;
     int idx = 0;
     for(Json::Value::const_iterator kmer=V_kmers_index_json.begin(); kmer!=V_kmers_index_json.end(); ++kmer, ++ idx ) {
