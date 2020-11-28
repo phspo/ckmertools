@@ -183,7 +183,7 @@ std::shared_ptr<std::map<std::string, std::map<std::string, int>>> get_hammingdi
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff =  vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
-                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff,OPointer,itersetPointer);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff,OPointer,itersetPointer,hamming_distance);
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";

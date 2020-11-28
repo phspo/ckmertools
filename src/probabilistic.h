@@ -36,7 +36,8 @@ namespace probabilistic {
             const std::string spaTypeName,
             const int deviationCutoff,
             const std::shared_ptr<std::unordered_set<std::string>> OPointer,
-            const std::shared_ptr<std::unordered_set<std::string>> itersetPointer
+            const std::shared_ptr<std::unordered_set<std::string>> itersetPointer,
+            const std::shared_ptr<std::map<std::string, std::map<std::string, int>>> hammingDistancedPointer
     );
 
     GenerativeResult calculateLikelihoodGenerative(
