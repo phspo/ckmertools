@@ -1,11 +1,9 @@
-
 #include <iostream>
 #include "probabilistic.h"
 #include<cmath>
 
 //const bool SKIP_ERRORS = true;
 const bool SINGLE_ERROR_TERM = false;
-const double VIRT_COUNT_NOT_OBSERVED_KMER = 0.000001;
 
 double probabilistic::poisson_pmf(const double k, const double lambda)
 {
@@ -20,18 +18,72 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
     return count;
 }
 
-double get_observation_count(std::string kmer, Json::Value observedCounts) {
+float * pre_compute_hd_probabilities(float normalizer, int length_kmer, float kmerError) {
+    int max_hd = 5;
+    float *a = (float*) malloc(sizeof(float) * max_hd);
+    a[0] = 1;
+    for (int i = 1; i < max_hd; i++)
+    {
+        //TODO: replace with mutation rate
+        // i is hamming distance
+        a[i] = normalizer*std::pow(kmerError,i)*std::pow((1 - kmerError),(length_kmer - i));
+    }
+    return a;
+}
+
+float get_expected_count(std::unordered_set<std::string> Si, std::map<std::string, std::map<std::string, int>> hd, float a[], std::string kmer, Json::Value expectedCounts, bool isExpectedKmer) {
+    //Use expectation value if available
+    float expectedCount = 0;
+    if (isExpectedKmer){
+        expectedCount = expectedCounts.get(kmer,-1).asFloat();
+        if (expectedCount == -1){
+            BOOST_LOG_TRIVIAL(fatal) << kmer << " was not found in the expected kmers but should be there, aborting! \n";
+            throw std::exception();
+        }
+    }
+    else{
+        // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
+        // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
+        std::map<std::string, int> hd_to_kmer = hd[kmer];
+        for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++)
+        {
+            if ( hd_to_kmer.count(*sikmer) > 0 ) {
+              // not found, add zero, hamming_distance really small
+            } else {
+            // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
+              expectedCount += a[hd_to_kmer[*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
+            }
+        }
+    }
+    return expectedCount;
+}
+
+int get_observation_count(std::string kmer, Json::Value observedCounts) {
     //Use observation value
-    double observedCount = observedCounts.get(kmer,-1).asDouble();
-    // TODO: Check observedCounts not found = 0.00001? 0 Not possible (err in pmf)
+    int observedCount = observedCounts.get(kmer,-1).asInt();
     if (observedCount == -1){
-        // fallback value (really small)
-        observedCount = VIRT_COUNT_NOT_OBSERVED_KMER;
+        observedCount = 0;
         //BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in the observed kmers but should be there, aborting! \n";
         //throw std::exception();
     }
     return observedCount;
 }
+
+bool a_subset_of_b(std::unordered_set<std::string> a, std::unordered_set<std::string> b) {
+    for(std::unordered_set<std::string>::const_iterator kmer=a.begin(); kmer!=a.end(); ++kmer) {
+        if (b.find(*kmer) == b.end()){ //not found
+            return false;
+        }
+    }
+    return true;
+}
+
+probabilistic::CoverageBasedResult error_result(probabilistic::CoverageBasedResult result) {
+    result.likelihood = NAN;
+    result.errorLikelihood = NAN;
+    return result;
+}
+
 
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
         const int threadID,
@@ -81,76 +133,37 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    for(std::unordered_set<std::string>::const_iterator kmer=Si.begin(); kmer!=Si.end(); ++kmer) {
-        if (O.find(*kmer) == O.end()){ //not found
-            result.likelihood = NAN;
-            result.errorLikelihood = NAN;
-            return result;
-        }
+    if (!a_subset_of_b(Si, O)) { //not found
+        return error_result(result);
     }
 
     //Calculate default value for expected counts
-    double sumOfObservedCounts = 0;
-    double length_kmer = 0;
+    int sumOfObservedCounts = 0;
     for(Json::Value::const_iterator kmer=observedCounts.begin(); kmer!=observedCounts.end(); ++kmer) {
         sumOfObservedCounts += get_observation_count(kmer.key().asString(), observedCounts);
-        // TODO: better assignment
-        length_kmer = kmer.key().asString().length();
     }
 
     //TODO: check if normalizer correct
     float normalizer = sumOfObservedCounts*kmerError/ Si.size();
-    constexpr size_t size = 5;
-    float a[size] {0};
-    a[0] = 1;
-    for (size_t i = 1; i < size; i++)
-    {
-        //TODO: replace with mutation rate
-        // i is hamming distance
-        a[i] = normalizer*std::pow(kmerError,i)*std::pow((1 - kmerError),(length_kmer - i));
-    }
+    // kmer length
+    int length_kmer = (*begin(Si)).length();
+    float* a = pre_compute_hd_probabilities(normalizer, length_kmer, kmerError);
 
     // |O|*e/|Uo|
-    float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
-
+    // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
+    // BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
     unsigned int expectedErrors = sumOfObservedCounts * kmerError;
-
     unsigned int observedErrors = 0;
-
-    BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
 
     //Calculate likelihoods
     for(std::unordered_set<std::string>::const_iterator kmer=iterset.begin(); kmer!=iterset.end(); ++kmer) {
 
-        double observedCount = get_observation_count(*kmer, observedCounts);
-
-        bool isExpectedKmer = false;
-
-        //Use expectation value if available
-        float expectedCount = 0;
-        if (Si.find(*kmer) != Si.end()){
-            expectedCount = expectedCounts.get(*kmer,-1).asFloat();
-            isExpectedKmer = true;
-            if (expectedCount == -1){
-                BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in the expected kmers but should be there, aborting! \n";
-                throw std::exception();
-            }
-        }
-        else{
-            // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
-            // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
-            std::map<std::string, int> hd_to_kmer = hd[*kmer];
-            for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++)
-            {
-                if ( hd_to_kmer.count(*sikmer) > 0 ) {
-                  // not found, add zero, hamming_distance really small
-                } else {
-                // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
-                  expectedCount += a[hd_to_kmer[*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
-                }
-            }
+        bool isExpectedKmer = (Si.find(*kmer) != Si.end());
+        if(!isExpectedKmer) {
             observedErrors += 1;
         }
+        int observedCount = get_observation_count(*kmer, observedCounts);
+        float expectedCount = get_expected_count(Si, hd, a, *kmer, expectedCounts, isExpectedKmer);
 
         if (SINGLE_ERROR_TERM && !isExpectedKmer){
             //kmer is an error and not taken into account as a single term
@@ -159,9 +172,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             //if the deviation cutoff is used we decide here whether or not to drop the spa type immediately
             if (deviationCutoff != -1){
                 if (abs(observedCount-expectedCount) >= deviationCutoff){
-                    result.likelihood = NAN;
-                    result.errorLikelihood = NAN;
-                    return result;
+                    return error_result(result);
                 }
             }
 
