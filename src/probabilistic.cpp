@@ -18,7 +18,7 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
     return count;
 }
 
-float * pre_compute_hd_probabilities(float normalizer, int length_kmer, float kmerError) {
+float * pre_compute_hd_probabilities(const float &normalizer, const int &length_kmer, const float kmerError) {
     int max_hd = 5;
     float *a = (float*) malloc(sizeof(float) * max_hd);
     a[0] = 1;
@@ -31,7 +31,7 @@ float * pre_compute_hd_probabilities(float normalizer, int length_kmer, float km
     return a;
 }
 
-float get_expected_count(std::unordered_set<std::string> Si, std::map<std::string, std::map<std::string, int>> hd, float a[], std::string kmer, Json::Value expectedCounts, bool isExpectedKmer) {
+float get_expected_count(std::unordered_set<std::string> &Si, std::map<std::string, std::map<std::string, int>> &hd, float a[], std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer) {
     //Use expectation value if available
     float expectedCount = 0;
     if (isExpectedKmer){
@@ -40,25 +40,31 @@ float get_expected_count(std::unordered_set<std::string> Si, std::map<std::strin
             BOOST_LOG_TRIVIAL(fatal) << kmer << " was not found in the expected kmers but should be there, aborting! \n";
             throw std::exception();
         }
-    }
-    else{
+    } else{
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
-        std::map<std::string, int> hd_to_kmer = hd[kmer];
-        for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++)
-        {
-            if ( hd_to_kmer.count(*sikmer) > 0 ) {
-              // not found, add zero, hamming_distance really small
-            } else {
-            // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
-              expectedCount += a[hd_to_kmer[*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
+        
+        if(hd[kmer].size() < Si.size()) {
+            std::map<std::string, int>::iterator it;
+            for ( it = hd[kmer].begin(); it != hd[kmer].end(); it++) {
+                // if kmer in Si
+                std::string target_kmer = it->first;
+                int hd = it->second;
+                expectedCount += a[hd]*expectedCounts.get(target_kmer,0).asFloat();
+            }
+        } else {
+            for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
+                if ( hd[kmer].count(*sikmer) > 0 ) {
+                    // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
+                    expectedCount += a[hd[kmer][*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
+                }
             }
         }
     }
     return expectedCount;
 }
 
-int get_observation_count(std::string kmer, Json::Value observedCounts) {
+int get_observation_count(std::string kmer, Json::Value &observedCounts) {
     //Use observation value
     int observedCount = observedCounts.get(kmer,-1).asInt();
     if (observedCount == -1){
@@ -69,7 +75,7 @@ int get_observation_count(std::string kmer, Json::Value observedCounts) {
     return observedCount;
 }
 
-bool a_subset_of_b(std::unordered_set<std::string> a, std::unordered_set<std::string> b) {
+bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::string> &b) {
     for(std::unordered_set<std::string>::const_iterator kmer=a.begin(); kmer!=a.end(); ++kmer) {
         if (b.find(*kmer) == b.end()){ //not found
             return false;

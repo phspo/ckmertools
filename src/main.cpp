@@ -22,7 +22,7 @@ enum ItersetOptions {
     OnVType
 };
 
-ItersetOptions resolveItersetOption(std::string input) {
+ItersetOptions resolveItersetOption(std::string &input) {
     if( input == "O" ) return OType;
     if( input == "V" ) return VType;
     if( input == "OuV" ) return OuVType;
@@ -31,7 +31,7 @@ ItersetOptions resolveItersetOption(std::string input) {
 }
 
 
-std::shared_ptr<std::unordered_set<std::string>> chooseIterset(std::shared_ptr<std::unordered_set<std::string>> OPointer, Json::Value expectedCounts, std::string itersetType) {
+std::shared_ptr<std::unordered_set<std::string>> chooseIterset(std::shared_ptr<std::unordered_set<std::string>> &OPointer, Json::Value &expectedCounts, std::string &itersetType) {
     //Define sets of all Spatype kmers
     std::unordered_set <std::string> V;
     for (Json::Value::const_iterator spaType = expectedCounts.begin(); spaType != expectedCounts.end(); ++spaType) {
