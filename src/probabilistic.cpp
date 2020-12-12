@@ -184,6 +184,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
             if(expectedCount == 0) {
                 // really unlikely meaning: log(pmf(0, 0.000001)) approx log(1) = 0
+                continue;
             }
             //Assuming poisson distribution, thus: Pr(X = k) = (lambda^k * e^-lambda) / k!
             //long double lnLikelihood = log(std::pow(expectedCount,observedCount) * exp(-expectedCount) / boost::math::factorial<long double>(observedCount));
