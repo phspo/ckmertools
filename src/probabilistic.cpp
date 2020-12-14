@@ -31,7 +31,7 @@ float * pre_compute_hd_probabilities(const float &normalizer, const int &length_
     return a;
 }
 
-float get_expected_count(std::unordered_set<std::string> &Si, KmersWrapper &kmers_wrapper, float a[], std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer) {
+float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<KmersWrapper> kmer_wrap_ptr, float a[], std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer) {
     //Use expectation value if available
     float expectedCount = 0;
     if (isExpectedKmer){
@@ -44,7 +44,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, KmersWrapper &kmer
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
         
-        std::map<std::string, int> hd_kmer = kmers_wrapper.hamming_distance_matrix[kmer];
+        std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
 
         if(hd_kmer.size() < Si.size()) {
             std::map<std::string, int>::iterator it;
@@ -101,23 +101,18 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             const std::string spaTypeName,
             const int deviationCutoff
         ){
-    KmersWrapper kmer_wrap = *kmer_wrap_ptr.get();
-    Json::Value observedCounts = kmer_wrap.observedCounts;
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
 
-    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
-    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
-    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";
-    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &((*kmer_wrap_ptr.get()).hamming_distance_matrix) << ", &((*kmer_wrap_ptr.get()).hamming_distance_matrix) \n";
-    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", &(kmer_wrap.hamming_distance_matrix) \n";
+    // BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
+    // BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
+    // BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";
+    // BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &((*kmer_wrap_ptr.get()).hamming_distance_matrix) << ", &((*kmer_wrap_ptr.get()).hamming_distance_matrix) \n";
+    // BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", &(kmer_wrap.hamming_distance_matrix) \n";
 
     //Create empty result object
     probabilistic::CoverageBasedResult result;
     result.likelihood  = 0.0;
     result.errorLikelihood = 0.0;
-
-    // Iterationset = O or V or both?
-    std::unordered_set<std::string> iterset = kmer_wrap.iterset;
 
     // Si = expectedKmers
     std::unordered_set<std::string> Si;
@@ -127,7 +122,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     //Calculate set of assumed error kmers
     std::unordered_set<std::string> assumedErrorKmers;
-    for (std::unordered_set<std::string>::const_iterator kmer = kmer_wrap.O.begin(); kmer != kmer_wrap.O.end(); kmer++)
+    for (std::unordered_set<std::string>::const_iterator kmer = (*kmer_wrap_ptr.get()).O.begin(); kmer != (*kmer_wrap_ptr.get()).O.end(); kmer++)
     {
         if (Si.find(*kmer) != Si.end()){ //equiv to kmer is expected
             //we don't want this
@@ -139,14 +134,14 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    if (!a_subset_of_b(Si, kmer_wrap.O)) { //not found
+    if (!a_subset_of_b(Si, (*kmer_wrap_ptr.get()).O)) { //not found
         return error_result(result);
     }
 
     //Calculate default value for expected counts
     int sumOfObservedCounts = 0;
-    for(Json::Value::const_iterator kmer=observedCounts.begin(); kmer!=observedCounts.end(); ++kmer) {
-        sumOfObservedCounts += get_observation_count(kmer.key().asString(), observedCounts);
+    for(Json::Value::const_iterator kmer=(*kmer_wrap_ptr.get()).observedCounts.begin(); kmer!=(*kmer_wrap_ptr.get()).observedCounts.end(); ++kmer) {
+        sumOfObservedCounts += get_observation_count(kmer.key().asString(), (*kmer_wrap_ptr.get()).observedCounts);
     }
 
     //TODO: check if normalizer correct
@@ -162,14 +157,14 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     unsigned int observedErrors = 0;
 
     //Calculate likelihoods
-    for(std::unordered_set<std::string>::const_iterator kmer=iterset.begin(); kmer!=iterset.end(); ++kmer) {
+    for(std::unordered_set<std::string>::const_iterator kmer=(*kmer_wrap_ptr.get()).iterset.begin(); kmer!=(*kmer_wrap_ptr.get()).iterset.end(); ++kmer) {
 
         bool isExpectedKmer = (Si.find(*kmer) != Si.end());
         if(!isExpectedKmer) {
             observedErrors += 1;
         }
-        int observedCount = get_observation_count(*kmer, observedCounts);
-        float expectedCount = get_expected_count(Si, kmer_wrap, a, *kmer, expectedCounts, isExpectedKmer);
+        int observedCount = get_observation_count(*kmer, (*kmer_wrap_ptr.get()).observedCounts);
+        float expectedCount = get_expected_count(Si, kmer_wrap_ptr, a, *kmer, expectedCounts, isExpectedKmer);
 
         if (SINGLE_ERROR_TERM && !isExpectedKmer){
             //kmer is an error and not taken into account as a single term
