@@ -105,9 +105,11 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     Json::Value observedCounts = kmer_wrap.observedCounts;
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
 
-    BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", same? \n";
-    BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &((kmer_wrap_ptr.get())->hamming_distance_matrix) << ", hamming_distance_matrix ptr \n";
-    BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", hamming_distance_matrix not ptr \n";
+    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
+    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
+    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";
+    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &((*kmer_wrap_ptr.get()).hamming_distance_matrix) << ", &((*kmer_wrap_ptr.get()).hamming_distance_matrix) \n";
+    BOOST_LOG_TRIVIAL(info) << "kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", &(kmer_wrap.hamming_distance_matrix) \n";
 
     //Create empty result object
     probabilistic::CoverageBasedResult result;
