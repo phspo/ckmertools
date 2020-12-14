@@ -94,32 +94,28 @@ probabilistic::CoverageBasedResult error_result(probabilistic::CoverageBasedResu
 
 
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
-        const int threadID,
-        const std::shared_ptr<Json::Value> observedCountsPointer,
-        const Json::Value &expectedCounts,
-        const float &kmerError,
-        const std::string spaTypeName,
-        const int deviationCutoff,
-        const std::shared_ptr<std::unordered_set<std::string>> OPointer,
-        const std::shared_ptr<std::unordered_set<std::string>> itersetPointer,
-        const std::shared_ptr<KmersWrapper> kmer_wrap_ptr
+            int threadID,
+            const std::shared_ptr<KmersWrapper> kmer_wrap_ptr,
+            const Json::Value &expectedCounts,
+            const float &kmerError,
+            const std::string spaTypeName,
+            const int deviationCutoff
         ){
-
-    //std::cout << "Pointer: " << observedCountsPointer << std::endl;
-    Json::Value observedCounts = *observedCountsPointer.get();
-
     KmersWrapper kmer_wrap = *kmer_wrap_ptr.get();
+    Json::Value observedCounts = kmer_wrap.observedCounts;
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
+
+    BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", same? \n";
+    BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &((kmer_wrap_ptr.get())->hamming_distance_matrix) << ", hamming_distance_matrix ptr \n";
+    BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", hamming_distance_matrix not ptr \n";
 
     //Create empty result object
     probabilistic::CoverageBasedResult result;
     result.likelihood  = 0.0;
     result.errorLikelihood = 0.0;
 
-    // O = observedKmers
-    std::unordered_set<std::string> O = *OPointer;
     // Iterationset = O or V or both?
-    std::unordered_set<std::string> iterset = *itersetPointer.get();
+    std::unordered_set<std::string> iterset = kmer_wrap.iterset;
 
     // Si = expectedKmers
     std::unordered_set<std::string> Si;
@@ -129,7 +125,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     //Calculate set of assumed error kmers
     std::unordered_set<std::string> assumedErrorKmers;
-    for (std::unordered_set<std::string>::const_iterator kmer = O.begin(); kmer != O.end(); kmer++)
+    for (std::unordered_set<std::string>::const_iterator kmer = kmer_wrap.O.begin(); kmer != kmer_wrap.O.end(); kmer++)
     {
         if (Si.find(*kmer) != Si.end()){ //equiv to kmer is expected
             //we don't want this
@@ -141,7 +137,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    if (!a_subset_of_b(Si, O)) { //not found
+    if (!a_subset_of_b(Si, kmer_wrap.O)) { //not found
         return error_result(result);
     }
 
