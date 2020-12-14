@@ -3,6 +3,7 @@
 #include "logsystem.h"
 #include "parsing.h"
 #include "probabilistic.h"
+
 #include <boost/program_options.hpp>
 #include <unordered_set>
 #include "ctpl/ctpl.h"
@@ -85,7 +86,7 @@ std::shared_ptr<std::unordered_set<std::string>> chooseIterset(std::shared_ptr<s
 }
 
 // distances_file = "V_kmer_distances.npz";     kmers_idx_file="V_kmers.json"
-std::shared_ptr<std::map<std::string, std::map<std::string, int>>> get_hammingdistances(std::string distances_file, std::string kmers_idx_file) {
+std::map<std::string, std::map<std::string, int>> get_hammingdistances(std::string distances_file, std::string kmers_idx_file) {
     cnpy::npz_t M = cnpy::npz_load(distances_file);
     std::vector<uint8_t> M_data = M["data"].as_vec<uint8_t>();
     std::vector<int> M_i = M["col"].as_vec<int>();
@@ -108,8 +109,7 @@ std::shared_ptr<std::map<std::string, std::map<std::string, int>>> get_hammingdi
 
     // example for hd
     //std::cout << "TEST:" << std::to_string(hamming_distances["TTTTTGCCAGGCTTGTTGTTGTCTTCTTTACCAGGCTT"]["TTTTTGCCAGGCTTGTTATTGTCTTCTTTGCCAGGCTT"]) << std::endl;
-    auto hd = std::make_shared<std::map<std::string, std::map<std::string, int>>>(hamming_distances);
-    return hd;
+    return hamming_distances;
 } 
 
 // e.g. ./c_kmertools --e "expected_counts.json" --c "1" --m 0 --o "alignment.counts.json" --kmererror 0.1 --d 1 --target "likelihoods_cov.json" --unexpected "unexpected_likelihoods_cov.json" --log "likelihoods_cov.log" --itersetType "O" --hammingdist "V_kmer_distances.npz" --kmersindex "V_kmers.json"
@@ -154,7 +154,9 @@ std::shared_ptr<std::map<std::string, std::map<std::string, int>>> get_hammingdi
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
             auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
-            std::shared_ptr<std::map<std::string, std::map<std::string, int>>> hamming_distance = get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>());
+            KmersWrapper kmer_wrap;
+            kmer_wrap.hamming_distance_matrix = get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>());
+            auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(kmer_wrap);
 
             float kmerError = vm["kmererror"].as<float>();
 
@@ -183,7 +185,7 @@ std::shared_ptr<std::map<std::string, std::map<std::string, int>>> get_hammingdi
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff =  vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
-                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff,OPointer,itersetPointer,hamming_distance);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,observedCountsPointer,*spaType,kmerError,spaType.key().asString(),deviationCutoff,OPointer,itersetPointer, kmer_wrap_ptr);
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";

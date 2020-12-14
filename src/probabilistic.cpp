@@ -31,7 +31,7 @@ float * pre_compute_hd_probabilities(const float &normalizer, const int &length_
     return a;
 }
 
-float get_expected_count(std::unordered_set<std::string> &Si, std::map<std::string, std::map<std::string, int>> &hd, float a[], std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer) {
+float get_expected_count(std::unordered_set<std::string> &Si, KmersWrapper &kmers_wrapper, float a[], std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer) {
     //Use expectation value if available
     float expectedCount = 0;
     if (isExpectedKmer){
@@ -44,9 +44,11 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::map<std::stri
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
         
-        if(hd[kmer].size() < Si.size()) {
+        std::map<std::string, int> hd_kmer = kmers_wrapper.hamming_distance_matrix[kmer];
+
+        if(hd_kmer.size() < Si.size()) {
             std::map<std::string, int>::iterator it;
-            for ( it = hd[kmer].begin(); it != hd[kmer].end(); it++) {
+            for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
                 // if kmer in Si
                 std::string target_kmer = it->first;
                 int hd = it->second;
@@ -54,9 +56,9 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::map<std::stri
             }
         } else {
             for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
-                if ( hd[kmer].count(*sikmer) > 0 ) {
+                if ( hd_kmer.count(*sikmer) > 0 ) {
                     // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
-                    expectedCount += a[hd[kmer][*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
+                    expectedCount += a[hd_kmer[*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
                 }
             }
         }
@@ -100,13 +102,13 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         const int deviationCutoff,
         const std::shared_ptr<std::unordered_set<std::string>> OPointer,
         const std::shared_ptr<std::unordered_set<std::string>> itersetPointer,
-        std::shared_ptr<std::map<std::string, std::map<std::string, int>>> hammingDistancedPointer
+        const std::shared_ptr<KmersWrapper> kmer_wrap_ptr
         ){
 
     //std::cout << "Pointer: " << observedCountsPointer << std::endl;
     Json::Value observedCounts = *observedCountsPointer.get();
 
-    std::map<std::string, std::map<std::string, int>> hd = *hammingDistancedPointer.get();
+    KmersWrapper kmer_wrap = *kmer_wrap_ptr.get();
     //std::cout << "Deviation Cutoff: " << deviationCutoff << std::endl;
 
     //Create empty result object
@@ -169,7 +171,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             observedErrors += 1;
         }
         int observedCount = get_observation_count(*kmer, observedCounts);
-        float expectedCount = get_expected_count(Si, hd, a, *kmer, expectedCounts, isExpectedKmer);
+        float expectedCount = get_expected_count(Si, kmer_wrap, a, *kmer, expectedCounts, isExpectedKmer);
 
         if (SINGLE_ERROR_TERM && !isExpectedKmer){
             //kmer is an error and not taken into account as a single term

@@ -12,6 +12,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "KmersWrapper.h"
+
 
 namespace probabilistic {
 
@@ -37,7 +39,7 @@ namespace probabilistic {
             const int deviationCutoff,
             const std::shared_ptr<std::unordered_set<std::string>> OPointer,
             const std::shared_ptr<std::unordered_set<std::string>> itersetPointer,
-            const std::shared_ptr<std::map<std::string, std::map<std::string, int>>> hammingDistancedPointer
+            const std::shared_ptr<KmersWrapper> kmer_wrap_ptr
     );
 
     GenerativeResult calculateLikelihoodGenerative(
