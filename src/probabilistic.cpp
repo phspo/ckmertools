@@ -80,6 +80,9 @@ int get_observation_count(std::string kmer, Json::Value &observedCounts) {
 bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::string> &b) {
     for(std::unordered_set<std::string>::const_iterator kmer=a.begin(); kmer!=a.end(); ++kmer) {
         if (b.find(*kmer) == b.end()){ //not found
+            BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in O but was in Si \n";
+            BOOST_LOG_TRIVIAL(fatal) << b.size() << " length O \n";
+            BOOST_LOG_TRIVIAL(fatal) << a.size() << " length Si \n";
             return false;
         }
     }
@@ -173,6 +176,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             //if the deviation cutoff is used we decide here whether or not to drop the spa type immediately
             if (deviationCutoff != -1){
                 if (abs(observedCount-expectedCount) >= deviationCutoff){
+                    BOOST_LOG_TRIVIAL(fatal) << observedCount << " observedCount," << expectedCount << " expectedCount, difference was to big in spatype " << spaTypeName << "\n";
                     return error_result(result);
                 }
             }
