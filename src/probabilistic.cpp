@@ -81,6 +81,7 @@ bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::s
     for(std::unordered_set<std::string>::const_iterator kmer=a.begin(); kmer!=a.end(); ++kmer) {
         if (b.find(*kmer) == b.end()){ //not found
             BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in O but was in Si \n";
+            BOOST_LOG_TRIVIAL(fatal) << *(b.begin()) << " example O entry \n";
             BOOST_LOG_TRIVIAL(fatal) << b.size() << " length O \n";
             BOOST_LOG_TRIVIAL(fatal) << a.size() << " length Si \n";
             return false;
@@ -137,7 +138,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    if (!a_subset_of_b(Si, (*kmer_wrap_ptr.get()).O)) { //not found
+    if (not (a_subset_of_b(Si, (*kmer_wrap_ptr.get()).O))) { //not found
         return error_result(result);
     }
 
