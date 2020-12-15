@@ -55,7 +55,12 @@ using namespace boost::program_options;
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
             auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
 
-            KmersWrapper kmer_wrap(parsing::get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>()), observedCounts, expectedCounts, parsing::get_V(expectedCounts), parsing::get_O(expectedCounts), vm["itersetType"].as<std::string>());
+            KmersWrapper kmer_wrap(parsing::get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>()), 
+            observedCounts, 
+            expectedCounts, 
+            parsing::get_V(expectedCounts), 
+            parsing::get_O(observedCounts), 
+            vm["itersetType"].as<std::string>());
 
             auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(kmer_wrap);
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
