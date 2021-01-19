@@ -55,12 +55,15 @@ using namespace boost::program_options;
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
             auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
 
+            float kmerError = vm["kmererror"].as<float>();
+
             KmersWrapper kmer_wrap(parsing::get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>()), 
             observedCounts, 
             expectedCounts, 
             parsing::get_V(expectedCounts), 
             parsing::get_O(observedCounts), 
-            vm["itersetType"].as<std::string>());
+            vm["itersetType"].as<std::string>(),
+            kmerError);
 
             auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(kmer_wrap);
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
@@ -69,7 +72,6 @@ using namespace boost::program_options;
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &((*kmer_wrap_ptr.get()).hamming_distance_matrix) << ", &((*kmer_wrap_ptr.get()).hamming_distance_matrix) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", &(kmer_wrap.hamming_distance_matrix) \n";
 
-            float kmerError = vm["kmererror"].as<float>();
 
             std::map<std::string,double> likelihoods;
             std::map<std::string,double> unexpectedKmerLikelihoods;

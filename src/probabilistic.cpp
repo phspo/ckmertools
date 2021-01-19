@@ -18,20 +18,7 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
     return count;
 }
 
-float * pre_compute_hd_probabilities(const float &normalizer, const int &length_kmer, const float kmerError) {
-    int max_hd = 5;
-    float *a = (float*) malloc(sizeof(float) * max_hd);
-    a[0] = 1;
-    for (int i = 1; i < max_hd; i++)
-    {
-        //TODO: replace with mutation rate
-        // i is hamming distance
-        a[i] = normalizer*std::pow(kmerError,i)*std::pow((1 - kmerError),(length_kmer - i));
-    }
-    return a;
-}
-
-float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<KmersWrapper> kmer_wrap_ptr, float a[], std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer) {
+float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<KmersWrapper> kmer_wrap_ptr, std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer, float normalizer) {
     //Use expectation value if available
     float expectedCount = 0;
     if (isExpectedKmer){
@@ -40,26 +27,31 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
             BOOST_LOG_TRIVIAL(fatal) << kmer << " was not found in the expected kmers but should be there, aborting! \n";
             throw std::exception();
         }
-    } else{
-        // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
-        // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
-        
-        std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
-
-        if(hd_kmer.size() < Si.size()) {
-            std::map<std::string, int>::iterator it;
-            for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
-                // if kmer in Si
-                std::string target_kmer = it->first;
-                int hd = it->second;
-                expectedCount += a[hd]*expectedCounts.get(target_kmer,0).asFloat();
-            }
-        } else {
-            for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
-                if ( hd_kmer.count(*sikmer) > 0 ) {
-                    // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
-                    expectedCount += a[hd_kmer[*sikmer]]*expectedCounts.get(*sikmer,0).asFloat();
-                }
+    }
+    // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
+    // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
+    
+    std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
+    if(hd_kmer.size() < Si.size()) {
+        std::map<std::string, int>::iterator it;
+        for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
+            // if kmer in Si
+            std::string target_kmer = it->first;
+            int hd = it->second;                                                        // = hamming distance(kmer, target_kmer)
+            float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
+            float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
+            
+            expectedCount += normalizer*a_hd*e_i;
+        }
+    } else {
+        for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
+            if ( hd_kmer.count(*sikmer) > 0 ) {
+                // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
+                int hd = hd_kmer[*sikmer];                                              // = hamming distance(kmer, sikmer)
+                float e_i = expectedCounts.get(*sikmer,0).asFloat();                    // = |sikmer|
+                float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
+                
+                expectedCount += normalizer*a_hd*e_i;
             }
         }
     }
@@ -150,9 +142,6 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     //TODO: check if normalizer correct
     float normalizer = sumOfObservedCounts*kmerError/ Si.size();
-    // kmer length
-    int length_kmer = (*begin(Si)).length();
-    float* a = pre_compute_hd_probabilities(normalizer, length_kmer, kmerError);
 
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
@@ -168,7 +157,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             observedErrors += 1;
         }
         int observedCount = get_observation_count(*kmer, (*kmer_wrap_ptr.get()).observedCounts);
-        float expectedCount = get_expected_count(Si, kmer_wrap_ptr, a, *kmer, expectedCounts, isExpectedKmer);
+        float expectedCount = get_expected_count(Si, kmer_wrap_ptr, *kmer, expectedCounts, isExpectedKmer, normalizer);
 
         if (SINGLE_ERROR_TERM && !isExpectedKmer){
             //kmer is an error and not taken into account as a single term

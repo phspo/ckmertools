@@ -12,6 +12,9 @@
 class KmersWrapper {
     private:
     std::unordered_set<std::string> getIterset();
+    void pre_compute_hd_probabilities(float kmerError, int max_hd);
+    float* a;
+
     public:
     std::map<std::string, std::map<std::string, int>> hamming_distance_matrix;
     Json::Value observedCounts;
@@ -21,7 +24,8 @@ class KmersWrapper {
     std::unordered_set<std::string> iterset;
     std::string itersetType;
 
-    KmersWrapper(std::map<std::string, std::map<std::string, int>> hd, Json::Value oc, Json::Value ec, std::unordered_set<std::string> v, std::unordered_set<std::string> o, std::string itype);
+    KmersWrapper(std::map<std::string, std::map<std::string, int>> hd, Json::Value oc, Json::Value ec, std::unordered_set<std::string> v, std::unordered_set<std::string> o, std::string itype, float kmerError);
     std::map<std::string, int> get_hamming_distances(std::string kmer);
     int get_hamming_distance(std::string kmer1,std::string kmer2);
+    float get_computed_probability(int i);
 };
