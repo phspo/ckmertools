@@ -57,15 +57,13 @@ using namespace boost::program_options;
 
             float kmerError = vm["kmererror"].as<float>();
 
-            KmersWrapper kmer_wrap(parsing::get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>()), 
+            auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(parsing::get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>()), 
             observedCounts, 
             expectedCounts, 
             parsing::get_V(expectedCounts), 
             parsing::get_O(observedCounts), 
             vm["itersetType"].as<std::string>(),
             kmerError);
-
-            auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(kmer_wrap);
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";
