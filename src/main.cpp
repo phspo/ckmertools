@@ -84,11 +84,13 @@ using namespace boost::program_options;
                     BOOST_LOG_TRIVIAL(info) << "Pushed " << spaType.key().asString() << " to threadpool \n";
                     //results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
                     results[idx] = probabilistic::calculateLikelihoodCoverageBased(1,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
+                    BOOST_LOG_TRIVIAL(info) << "Done " << spaType.key().asString() << " threadpool \n";
                 }
                 else{
                     BOOST_LOG_TRIVIAL(info) << "No expected k-mers found for spa-type: " << spaType.key().asString() << ", maybe the type is too small? \n";
                 }
             }
+            BOOST_LOG_TRIVIAL(info) << "DONE ALL \n";
             idx = 0;
             //Fetch results
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++idx) {
