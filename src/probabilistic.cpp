@@ -88,13 +88,6 @@ bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::s
     return true;
 }
 
-probabilistic::CoverageBasedResult error_result(probabilistic::CoverageBasedResult result) {
-    result.likelihood = NAN;
-    result.errorLikelihood = NAN;
-    return result;
-}
-
-
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
             int threadID,
             const std::shared_ptr<KmersWrapper> kmer_wrap_ptr,
@@ -115,7 +108,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     probabilistic::CoverageBasedResult result;
     result.likelihood  = 0.0;
     result.errorLikelihood = 0.0;
-    BOOST_LOG_TRIVIAL(info) << "Pushed starting calculateLikelihoodCoverageBased \n";
+    BOOST_LOG_TRIVIAL(info) << "starting calculateLikelihoodCoverageBased \n";
     // Si = expectedKmers
     std::unordered_set<std::string> Si;
     for(Json::Value::const_iterator kmer=expectedCounts.begin(); kmer!=expectedCounts.end(); ++kmer) {
@@ -137,7 +130,9 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
     if (not (a_subset_of_b(Si, (*kmer_wrap_ptr.get()).O))) { //not found
-        return error_result(result);
+        result.likelihood = NAN;
+        result.errorLikelihood = NAN;
+        return result;
     }
 
     //Calculate default value for expected counts
@@ -174,7 +169,9 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             if (deviationCutoff != -1){
                 if (abs(observedCount-expectedCount) >= deviationCutoff){
                     BOOST_LOG_TRIVIAL(fatal) << observedCount << " observedCount," << expectedCount << " expectedCount, difference was to big in spatype " << spaTypeName << "\n";
-                    return error_result(result);
+                    result.likelihood = NAN;
+                    result.errorLikelihood = NAN;
+                    return result;
                 }
             }
 
