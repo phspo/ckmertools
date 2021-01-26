@@ -1,5 +1,6 @@
 #include "KmersWrapper.h"
 #include<cmath>
+#include "parsing.h"
 
 std::map<std::string, int> KmersWrapper::get_hamming_distances(std::string kmer) {
     return KmersWrapper::hamming_distance_matrix[kmer];
@@ -10,16 +11,16 @@ int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
 }
 
 
-KmersWrapper::KmersWrapper(std::map<std::string, std::map<std::string, int>> hd, Json::Value oc, Json::Value ec, std::unordered_set<std::string> v, std::unordered_set<std::string> o, std::string itype, float kmerError) {
-    hamming_distance_matrix = hd;
-    observedCounts = oc;
-    expectedCounts = ec;
-    V = v;
-    O = o;
+KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError) {
+    hamming_distance_matrix = parsing::get_hammingdistances(hammingdist, kmersindex);
+    observedCounts = parsing::readDictionary(observed);
+    expectedCounts = parsing::readDictionary(expected);
+    V = parsing::get_V(expectedCounts);
+    O = parsing::get_O(observedCounts);
     itersetType = itype;
     iterset = getIterset();
     int max_hd = 5;
-    float *a = (float*) malloc(sizeof(float) * max_hd);
+    float a[max_hd];
     pre_compute_hd_probabilities(kmerError, max_hd);
 };
 

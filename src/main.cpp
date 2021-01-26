@@ -50,18 +50,14 @@ using namespace boost::program_options;
 
         //Coverave-Based Mode
         if (vm["m"].as<int>() == 0){
-
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
-            Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
-            auto observedCountsPointer = std::make_shared<Json::Value>(observedCounts);
 
             float kmerError = vm["kmererror"].as<float>();
 
-            auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(parsing::get_hammingdistances(vm["hammingdist"].as<std::string>(), vm["kmersindex"].as<std::string>()), 
-            observedCounts, 
-            expectedCounts, 
-            parsing::get_V(expectedCounts), 
-            parsing::get_O(observedCounts), 
+            auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
+            vm["kmersindex"].as<std::string>(),
+            vm["expected"].as<std::string>(), 
+            vm["observed"].as<std::string>(),
             vm["itersetType"].as<std::string>(),
             kmerError);
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";

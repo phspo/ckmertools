@@ -24,7 +24,7 @@ class KmersWrapper {
     std::unordered_set<std::string> iterset;
     std::string itersetType;
 
-    KmersWrapper(std::map<std::string, std::map<std::string, int>> hd, Json::Value oc, Json::Value ec, std::unordered_set<std::string> v, std::unordered_set<std::string> o, std::string itype, float kmerError);
+    KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError);
     std::map<std::string, int> get_hamming_distances(std::string kmer);
     int get_hamming_distance(std::string kmer1,std::string kmer2);
     float get_computed_probability(int i);
