@@ -50,6 +50,7 @@ using namespace boost::program_options;
 
         //Coverave-Based Mode
         if (vm["m"].as<int>() == 0){
+            BOOST_LOG_TRIVIAL(info) << "Running coverage based \n";
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
 
             float kmerError = vm["kmererror"].as<float>();
@@ -79,7 +80,8 @@ using namespace boost::program_options;
             //Distribute tasks
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
-                    int deviationCutoff =  vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
+                    int deviationCutoff = vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
+                    BOOST_LOG_TRIVIAL(info) << "Pushed " << spaType.key().asString() << " to threadpool \n";
                     results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
                 }
                 else{

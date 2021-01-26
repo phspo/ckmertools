@@ -20,6 +20,7 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
 
 float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<KmersWrapper> kmer_wrap_ptr, std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer, float normalizer) {
     //Use expectation value if available
+    BOOST_LOG_TRIVIAL(info) << "get_expected_count \n";
     float expectedCount = 0;
     if (isExpectedKmer){
         expectedCount = expectedCounts.get(kmer,-1).asFloat();
@@ -55,10 +56,12 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
             }
         }
     }
+    BOOST_LOG_TRIVIAL(info) << "get_expected_count END \n";
     return expectedCount;
 }
 
 int get_observation_count(std::string kmer, Json::Value &observedCounts) {
+    BOOST_LOG_TRIVIAL(info) << "get_observation_count \n";
     //Use observation value
     int observedCount = observedCounts.get(kmer,-1).asInt();
     if (observedCount == -1){
@@ -66,10 +69,12 @@ int get_observation_count(std::string kmer, Json::Value &observedCounts) {
         //BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in the observed kmers but should be there, aborting! \n";
         //throw std::exception();
     }
+    BOOST_LOG_TRIVIAL(info) << "get_observation_count END \n";
     return observedCount;
 }
 
 bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::string> &b) {
+    BOOST_LOG_TRIVIAL(info) << "a_subset_of_b \n";
     for(std::unordered_set<std::string>::const_iterator kmer=a.begin(); kmer!=a.end(); ++kmer) {
         if (b.find(*kmer) == b.end()){ //not found
             BOOST_LOG_TRIVIAL(fatal) << *kmer << " was not found in O but was in Si \n";
@@ -79,6 +84,7 @@ bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::s
             return false;
         }
     }
+    BOOST_LOG_TRIVIAL(info) << "a_subset_of_b END \n";
     return true;
 }
 
@@ -109,7 +115,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     probabilistic::CoverageBasedResult result;
     result.likelihood  = 0.0;
     result.errorLikelihood = 0.0;
-
+    BOOST_LOG_TRIVIAL(info) << "Pushed starting calculateLikelihoodCoverageBased \n";
     // Si = expectedKmers
     std::unordered_set<std::string> Si;
     for(Json::Value::const_iterator kmer=expectedCounts.begin(); kmer!=expectedCounts.end(); ++kmer) {
@@ -149,6 +155,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     unsigned int expectedErrors = sumOfObservedCounts * kmerError;
     unsigned int observedErrors = 0;
 
+    BOOST_LOG_TRIVIAL(info) << "Beginning for loop \n";
     //Calculate likelihoods
     for(std::unordered_set<std::string>::const_iterator kmer=(*kmer_wrap_ptr.get()).iterset.begin(); kmer!=(*kmer_wrap_ptr.get()).iterset.end(); ++kmer) {
 
@@ -177,6 +184,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             }
             //Assuming poisson distribution, thus: Pr(X = k) = (lambda^k * e^-lambda) / k!
             //long double lnLikelihood = log(std::pow(expectedCount,observedCount) * exp(-expectedCount) / boost::math::factorial<long double>(observedCount));
+            BOOST_LOG_TRIVIAL(info) << "poisson_pmf \n";
             double lnLikelihood = poisson_pmf(observedCount,expectedCount);
 
             if (lnLikelihood == 0 or lnLikelihood != lnLikelihood){
