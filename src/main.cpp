@@ -56,8 +56,8 @@ using namespace boost::program_options;
 
             auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
             vm["kmersindex"].as<std::string>(),
-            vm["expected"].as<std::string>(), 
             vm["observed"].as<std::string>(),
+            vm["expected"].as<std::string>(), 
             vm["itersetType"].as<std::string>(),
             kmerError);
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
