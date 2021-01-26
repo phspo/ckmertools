@@ -33,8 +33,8 @@ namespace probabilistic {
     CoverageBasedResult calculateLikelihoodCoverageBased(
             int threadID,
             const std::shared_ptr<KmersWrapper> kmer_wrap_ptr,
-            const Json::Value &expectedCounts,
-            const float &kmerError,
+            const Json::Value expectedCounts,
+            const float kmerError,
             const std::string spaTypeName,
             const int deviationCutoff
     );
