@@ -95,19 +95,24 @@ using namespace boost::program_options;
             //Fetch results
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++idx) {
                 if (spaType->getMemberNames().size() > 0){
+                    BOOST_LOG_TRIVIAL(info) << "PARSING result \n";
                     probabilistic::CoverageBasedResult result = results[idx]; //.get();
+                    BOOST_LOG_TRIVIAL(info) << "PARSED result \n";
                     likelihoods.insert(std::pair<std::string,long double>(spaType.key().asString(),result.likelihood));
                     unexpectedKmerLikelihoods.insert(std::pair<std::string,long double>(spaType.key().asString(),result.likelihood));
+                    BOOST_LOG_TRIVIAL(info) << "PARSED " << spaType.key().asString() << "\n";
                     //std::cout << result.likelihood << "/" << result.errorLikelihood << "\n";
                 }
                 else{
                     //Ignore, warning was given during job distribution phase
                 }
             }
+            BOOST_LOG_TRIVIAL(info) << "DONE PARSE \n";
             parsing::writeDictionary(likelihoods,vm["target"].as<std::string>());
             if (vm.count("unexpected")){
                 parsing::writeDictionary(unexpectedKmerLikelihoods,vm["unexpected"].as<std::string>());
             }
+            BOOST_LOG_TRIVIAL(info) << "DONE IF \n";
         }
         else if (vm["m"].as<int>() == 1) {
             Json::Value sequenceProfiles = parsing::readDictionary(vm["profiles"].as<std::string>());
@@ -170,4 +175,5 @@ using namespace boost::program_options;
     {
         BOOST_LOG_TRIVIAL(error) << ex.what() << '\n';
     }
+    BOOST_LOG_TRIVIAL(info) << "FINISHED \n";
 }
