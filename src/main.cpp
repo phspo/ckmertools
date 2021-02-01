@@ -47,9 +47,9 @@ using namespace boost::program_options;
                 BOOST_LOG_TRIVIAL(info) << "Log system initialized ...";
             }
         }
-
+        int mode = vm["m"].as<int>();
         //Coverave-Based Mode
-        if (vm["m"].as<int>() == 0){
+        if (mode == 0){
             BOOST_LOG_TRIVIAL(info) << "Running coverage based \n";
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
 
@@ -114,7 +114,7 @@ using namespace boost::program_options;
             }
             BOOST_LOG_TRIVIAL(info) << "DONE IF \n";
         }
-        else if (vm["m"].as<int>() == 1) {
+        else if (mode == 1) {
             Json::Value sequenceProfiles = parsing::readDictionary(vm["profiles"].as<std::string>());
             Json::Value observedCounts = parsing::readDictionary(vm["observed"].as<std::string>());
             
