@@ -74,16 +74,18 @@ using namespace boost::program_options;
 
             ctpl::thread_pool p(vm.count("cores") ? vm["cores"].as<int>() : 1 );
 
-            //std::vector<std::future< probabilistic::CoverageBasedResult>> results(expectedCounts.size());
-            std::vector<probabilistic::CoverageBasedResult> results(expectedCounts.size()); 
+            std::vector<std::future< probabilistic::CoverageBasedResult>> results(expectedCounts.size());
+            // one thread variant:
+            //std::vector<probabilistic::CoverageBasedResult> results(expectedCounts.size()); 
             int idx = 0;
             //Distribute tasks
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff = vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
                     BOOST_LOG_TRIVIAL(info) << "Pushed " << spaType.key().asString() << " to threadpool \n";
-                    //results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
-                    results[idx] = probabilistic::calculateLikelihoodCoverageBased(1,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
+                    results[idx] = p.push(probabilistic::calculateLikelihoodCoverageBased,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
+                    // one thread variant:
+                    //results[idx] = probabilistic::calculateLikelihoodCoverageBased(1,kmer_wrap_ptr,*spaType,kmerError,spaType.key().asString(),deviationCutoff);
                     BOOST_LOG_TRIVIAL(info) << "Done " << spaType.key().asString() << " threadpool \n";
                 }
                 else{
@@ -95,7 +97,9 @@ using namespace boost::program_options;
             //Fetch results
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++idx) {
                 if (spaType->getMemberNames().size() > 0){
-                    probabilistic::CoverageBasedResult result = results[idx]; //.get();
+                    probabilistic::CoverageBasedResult result = results[idx].get();
+                    // one thread variant:
+                    //probabilistic::CoverageBasedResult result = results[idx];
                     likelihoods.insert(std::pair<std::string,long double>(spaType.key().asString(),result.likelihood));
                     unexpectedKmerLikelihoods.insert(std::pair<std::string,long double>(spaType.key().asString(),result.likelihood));
                     //std::cout << result.likelihood << "/" << result.errorLikelihood << "\n";
