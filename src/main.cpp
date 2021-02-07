@@ -62,6 +62,9 @@ using namespace boost::program_options;
             vm["itersetType"].as<std::string>(),
             kmerError);
             // return early?
+            BOOST_LOG_TRIVIAL(info) << "RESET \n";
+            kmer_wrap_ptr.reset();
+            BOOST_LOG_TRIVIAL(info) << "FINISHED \n";
             return 0;
             /*
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
