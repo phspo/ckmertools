@@ -54,8 +54,7 @@ using namespace boost::program_options;
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
 
             float kmerError = vm["kmererror"].as<float>();
-            return 0;
-            /*
+            
             std::shared_ptr<KmersWrapper> kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
             vm["kmersindex"].as<std::string>(),
             vm["observed"].as<std::string>(),
@@ -63,7 +62,8 @@ using namespace boost::program_options;
             vm["itersetType"].as<std::string>(),
             kmerError);
             // return early?
-            
+            return 0;
+            /*
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";

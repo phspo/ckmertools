@@ -24,6 +24,10 @@ KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std:
     pre_compute_hd_probabilities(kmerError, max_hd);
 };
 
+KmersWrapper::~KmersWrapper() {
+    delete a;
+};
+
 enum ItersetOptions {
     InvalidType,
     OType,
