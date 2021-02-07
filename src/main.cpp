@@ -61,12 +61,7 @@ using namespace boost::program_options;
             vm["expected"].as<std::string>(), 
             vm["itersetType"].as<std::string>(),
             kmerError);
-            // return early?
-            BOOST_LOG_TRIVIAL(info) << "RESET \n";
-            kmer_wrap_ptr.reset();
-            BOOST_LOG_TRIVIAL(info) << "FINISHED \n";
-            return 0;
-            /*
+
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";
@@ -120,7 +115,11 @@ using namespace boost::program_options;
             }
             // stop from deallocing kmer_wrap_ptr?
             BOOST_LOG_TRIVIAL(info) << "DONE IF \n";
-            */
+            // return early?
+            BOOST_LOG_TRIVIAL(info) << "RESET \n";
+            kmer_wrap_ptr.reset();
+            BOOST_LOG_TRIVIAL(info) << "FINISHED \n";
+            return 0;
         }
         else{
             BOOST_LOG_TRIVIAL(error) << "Illegal Mode ... \n";
