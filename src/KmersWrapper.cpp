@@ -19,9 +19,8 @@ KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std:
     O = parsing::get_O(observedCounts);
     itersetType = itype;
     iterset = getIterset();
-    int max_hd = 5;
-    float a[max_hd];
-    pre_compute_hd_probabilities(kmerError, max_hd);
+    a = (float *) malloc(5*sizeof(float));
+    pre_compute_hd_probabilities(kmerError, 5);
 };
 
 enum ItersetOptions {

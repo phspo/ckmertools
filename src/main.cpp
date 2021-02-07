@@ -108,6 +108,9 @@ using namespace boost::program_options;
             if (vm.count("unexpected")){
                 parsing::writeDictionary(unexpectedKmerLikelihoods,vm["unexpected"].as<std::string>());
             }
+            kmer_wrap_ptr.reset();
+            BOOST_LOG_TRIVIAL(info) << "FINISHED \n";
+            return 0;
         }
         else if (vm["m"].as<int>() == 1) {
             Json::Value sequenceProfiles = parsing::readDictionary(vm["profiles"].as<std::string>());
