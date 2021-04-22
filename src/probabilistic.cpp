@@ -29,33 +29,35 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
             throw std::exception();
         }
     }
-    // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
-    // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
-    
-    std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
-    if(hd_kmer.size() < Si.size()) {
-        std::map<std::string, int>::iterator it;
-        for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
-            // if kmer in Si
-            std::string target_kmer = it->first;
-            int hd = it->second;                                                        // = hamming distance(kmer, target_kmer)
-            float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
-            float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
-            
-            expectedCount += normalizer*a_hd*e_i;
-        }
-    } else {
-        for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
-            if ( hd_kmer.count(*sikmer) > 0 ) {
-                // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
-                int hd = hd_kmer[*sikmer];                                              // = hamming distance(kmer, sikmer)
-                float e_i = expectedCounts.get(*sikmer,0).asFloat();                    // = |sikmer|
-                float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
-                
+    else {
+        // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
+        // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
+        std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
+        if(hd_kmer.size() < Si.size()) {
+            std::map<std::string, int>::iterator it;
+            for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
+                // if kmer in Si
+                std::string target_kmer = it->first;
+                int hd = it->second;                                                        // = hamming distance(kmer, target_kmer)
+                float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
+                float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
+
                 expectedCount += normalizer*a_hd*e_i;
+            }
+        } else {
+            for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
+                if ( hd_kmer.count(*sikmer) > 0 ) {
+                    // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
+                    int hd = hd_kmer[*sikmer];                                              // = hamming distance(kmer, sikmer)
+                    float e_i = expectedCounts.get(*sikmer,0).asFloat();                    // = |sikmer|
+                    float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
+
+                    expectedCount += normalizer*a_hd*e_i;
+                }
             }
         }
     }
+
     BOOST_LOG_TRIVIAL(info) << "get_expected_count END \n";
     return expectedCount;
 }
