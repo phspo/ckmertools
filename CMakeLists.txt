@@ -10,7 +10,7 @@ link_libraries(jsoncpp)
 #find_package(jsoncpp REQUIRED)
 #get_target_property(JSON_INC_PATH jsoncpp_lib_static INTERFACE_INCLUDE_DIRECTORIES)
 
-include_directories(${JSON_INC_PATH})
+include_directories(jsoncpp)
 include_directories(${Boost_INCLUDE_DIR})
 
 add_executable(c_kmertools src/main.cpp src/probabilistic.cpp src/probabilistic.h src/logsystem.cpp src/logsystem.h src/parsing.cpp src/parsing.h src/KmersWrapper.cpp)
