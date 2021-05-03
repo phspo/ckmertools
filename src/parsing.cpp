@@ -26,6 +26,7 @@ void parsing::writeDictionary(const std::map<std::string,double> &map,const std:
 // distances_file = "V_kmer_distances.npz";     kmers_idx_file="V_kmers.json"
 std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistances(std::string distances_file, std::string kmers_idx_file) {
     cnpy::npz_t M = cnpy::npz_load(distances_file);
+    std::cout << "npz2\n";
     std::vector<uint8_t> M_data = M["data"].as_vec<uint8_t>();
     std::vector<int> M_i = M["col"].as_vec<int>();
     std::vector<int> M_j = M["row"].as_vec<int>();
@@ -34,17 +35,18 @@ std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistances(
     Json::Value V_kmers_index_json = parsing::readDictionary(kmers_idx_file);
     std::vector<std::string> V_kmers_index;
     int idx = 0;
+    std::cout << "npz3\n";
     for(Json::Value::const_iterator kmer=V_kmers_index_json.begin(); kmer!=V_kmers_index_json.end(); ++kmer, ++ idx ) {
         V_kmers_index.push_back(kmer->asString());
     }
-
+    std::cout <<  M_data.size() << "npz4\n";
     std::map<std::string, std::map<std::string, int>> hamming_distances;
     for (int i = 0; i < M_data.size(); i++) {
         std::string id_x = V_kmers_index[M_i[i]];
         std::string id_y = V_kmers_index[M_j[i]];
         hamming_distances[id_x][id_y] = M_data[i];
     }
-
+    std::cout << "npz5\n";
     // example for hd
     //std::cout << "TEST:" << std::to_string(hamming_distances["TTTTTGCCAGGCTTGTTGTTGTCTTCTTTACCAGGCTT"]["TTTTTGCCAGGCTTGTTATTGTCTTCTTTGCCAGGCTT"]) << std::endl;
     return hamming_distances;

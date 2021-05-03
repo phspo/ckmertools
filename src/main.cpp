@@ -47,31 +47,32 @@ using namespace boost::program_options;
                 BOOST_LOG_TRIVIAL(info) << "Log system initialized ...";
             }
         }
-
+        int mode = vm["m"].as<int>();
         //Coverave-Based Mode
-        if (vm["m"].as<int>() == 0){
+        if (mode == 0){
             BOOST_LOG_TRIVIAL(info) << "Running coverage based \n";
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
 
             float kmerError = vm["kmererror"].as<float>();
-
-            auto kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
+            
+            std::shared_ptr<KmersWrapper> kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
             vm["kmersindex"].as<std::string>(),
             vm["observed"].as<std::string>(),
             vm["expected"].as<std::string>(), 
             vm["itersetType"].as<std::string>(),
             kmerError);
+
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap) << ", &(kmer_wrap) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &((*kmer_wrap_ptr.get()).hamming_distance_matrix) << ", &((*kmer_wrap_ptr.get()).hamming_distance_matrix) \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(kmer_wrap.hamming_distance_matrix) << ", &(kmer_wrap.hamming_distance_matrix) \n";
-
+            
 
             std::map<std::string,double> likelihoods;
             std::map<std::string,double> unexpectedKmerLikelihoods;
 
-
+            BOOST_LOG_TRIVIAL(info) << "threadpools \n";
             ctpl::thread_pool p(vm.count("cores") ? vm["cores"].as<int>() : 1 );
 
             std::vector<std::future< probabilistic::CoverageBasedResult>> results(expectedCounts.size());
@@ -79,6 +80,7 @@ using namespace boost::program_options;
             //std::vector<probabilistic::CoverageBasedResult> results(expectedCounts.size()); 
             int idx = 0;
             //Distribute tasks
+            BOOST_LOG_TRIVIAL(info) << "disribute \n";
             for(Json::Value::const_iterator spaType=expectedCounts.begin(); spaType!=expectedCounts.end(); ++spaType, ++ idx) {
                 if (spaType->getMemberNames().size() > 0){
                     int deviationCutoff = vm.count("deviationcutoff")  ? vm["deviationcutoff"].as<int>()  :  -1;
@@ -102,12 +104,14 @@ using namespace boost::program_options;
                     //probabilistic::CoverageBasedResult result = results[idx];
                     likelihoods.insert(std::pair<std::string,long double>(spaType.key().asString(),result.likelihood));
                     unexpectedKmerLikelihoods.insert(std::pair<std::string,long double>(spaType.key().asString(),result.likelihood));
+                    BOOST_LOG_TRIVIAL(info) << "PARSED " << spaType.key().asString() << "\n";
                     //std::cout << result.likelihood << "/" << result.errorLikelihood << "\n";
                 }
                 else{
                     //Ignore, warning was given during job distribution phase
                 }
             }
+            BOOST_LOG_TRIVIAL(info) << "DONE PARSE \n";
             parsing::writeDictionary(likelihoods,vm["target"].as<std::string>());
             if (vm.count("unexpected")){
                 parsing::writeDictionary(unexpectedKmerLikelihoods,vm["unexpected"].as<std::string>());
@@ -175,6 +179,8 @@ using namespace boost::program_options;
     }
     catch (const error &ex)
     {
+        BOOST_LOG_TRIVIAL(info) << "ERROR DETECTED \n";
         BOOST_LOG_TRIVIAL(error) << ex.what() << '\n';
     }
+    BOOST_LOG_TRIVIAL(info) << "FINISHED \n";
 }

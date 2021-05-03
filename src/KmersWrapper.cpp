@@ -1,6 +1,8 @@
 #include "KmersWrapper.h"
 #include<cmath>
 #include "parsing.h"
+#include <iostream>
+
 
 std::map<std::string, int> KmersWrapper::get_hamming_distances(std::string kmer) {
     return KmersWrapper::hamming_distance_matrix[kmer];
@@ -12,15 +14,25 @@ int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
 
 
 KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError) {
+    std::cout << "npz\n";
     hamming_distance_matrix = parsing::get_hammingdistances(hammingdist, kmersindex);
+    std::cout << "npz import done \n";
     observedCounts = parsing::readDictionary(observed);
     expectedCounts = parsing::readDictionary(expected);
+    std::cout << "read dict \n";
     V = parsing::get_V(expectedCounts);
     O = parsing::get_O(observedCounts);
+    std::cout << "parsed \n";
     itersetType = itype;
     iterset = getIterset();
     a = (float *) malloc(5*sizeof(float));
+    std::cout << "precomputing \n";
     pre_compute_hd_probabilities(kmerError, 5);
+    std::cout << "kmerswrapper done \n";
+};
+
+KmersWrapper::~KmersWrapper() {
+    delete a;
 };
 
 enum ItersetOptions {
@@ -41,7 +53,7 @@ ItersetOptions resolveItersetOption(std::string &input) {
 
 void KmersWrapper::pre_compute_hd_probabilities(float kmerError, int max_hd) {
     int length_kmer = (*begin(O)).length();
-    a[0] = 1;
+    a[0] = (float) 1;
     for (int i = 1; i < max_hd; i++)
     {
         //TODO: replace with mutation rate
