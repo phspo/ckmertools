@@ -15,4 +15,4 @@ include_directories(${Boost_INCLUDE_DIR})
 add_executable(c_kmertools src/main.cpp src/probabilistic.cpp src/probabilistic.h src/logsystem.cpp src/logsystem.h src/parsing.cpp src/parsing.h src/KmersWrapper.cpp)
 
 # removed static?
-target_link_libraries (c_kmertools ${Boost_LIBRARIES} jsoncpp_lib cnpy z)
+target_link_libraries (c_kmertools ${Boost_LIBRARIES} jsoncpp_lib -L/usr/local/lib -lcnpy z)
