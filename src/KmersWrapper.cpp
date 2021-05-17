@@ -14,21 +14,15 @@ int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
 
 
 KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError) {
-    std::cout << "npz\n";
     hamming_distance_matrix = parsing::get_hammingdistances(hammingdist, kmersindex);
-    std::cout << "npz import done \n";
     observedCounts = parsing::readDictionary(observed);
     expectedCounts = parsing::readDictionary(expected);
-    std::cout << "read dict \n";
     V = parsing::get_V(expectedCounts);
     O = parsing::get_O(observedCounts);
-    std::cout << "parsed \n";
     itersetType = itype;
     iterset = getIterset();
     a = (float *) malloc(5*sizeof(float));
-    std::cout << "precomputing \n";
     pre_compute_hd_probabilities(kmerError, 5);
-    std::cout << "kmerswrapper done \n";
 };
 
 KmersWrapper::~KmersWrapper() {

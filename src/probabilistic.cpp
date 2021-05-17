@@ -42,7 +42,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                 float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
                 float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
 
-                expectedCount += normalizer*a_hd*e_i;
+                expectedCount += a_hd*e_i;
             }
         } else {
             for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
@@ -52,10 +52,12 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                     float e_i = expectedCounts.get(*sikmer,0).asFloat();                    // = |sikmer|
                     float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
 
-                    expectedCount += normalizer*a_hd*e_i;
+                    expectedCount += a_hd*e_i;
                 }
             }
         }
+        std::cout << expectedCount*normalizer << " result; " << normalizer << " normalizer; " << expectedCount << " expectedCount;\n";
+        expectedCount = expectedCount*normalizer;
     }
 
     BOOST_LOG_TRIVIAL(info) << "get_expected_count END \n";
@@ -144,7 +146,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     }
 
     //TODO: check if normalizer correct
-    float normalizer = sumOfObservedCounts*kmerError; // / Si.size();
+    float normalizer = sumOfObservedCounts*kmerError/assumedErrorKmers.size(); // / Si.size();
 
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
