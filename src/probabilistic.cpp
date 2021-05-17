@@ -150,7 +150,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     float default_normalizer = sumOfObservedCounts*kmerError/Si.size();
     float orig_normalizer = sumOfObservedCounts*kmerError/(*kmer_wrap_ptr.get()).observedCounts.size();
     float another_normalizer = sumOfObservedCounts*kmerError;
-    float normalizer = another_normalizer;
+    float normalizer = default_normalizer*100;
     std::cout << another_normalizer << " another_normalizer; " << default_normalizer << " default normalizer; " << orig_normalizer << " orig normalizer;\n";
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
