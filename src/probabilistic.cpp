@@ -32,6 +32,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
     else {
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
+        expectedCount = 0.0000001;
         std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
         if(hd_kmer.size() < Si.size()) {
             std::map<std::string, int>::iterator it;
@@ -52,12 +53,12 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                     float e_i = expectedCounts.get(*sikmer,0).asFloat();                    // = |sikmer|
                     float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
 
-                    expectedCount += a_hd*e_i;
+                    expectedCount += a_hd*e_i*normalizer;
                 }
             }
         }
-        std::cout << expectedCount*normalizer << " result; " << normalizer << " normalizer; " << expectedCount << " expectedCount;\n";
-        expectedCount = expectedCount*normalizer;
+        std::cout << expectedCount << " result; " << normalizer << " normalizer;\n";
+        expectedCount = expectedCount;
     }
 
     BOOST_LOG_TRIVIAL(info) << "get_expected_count END \n";
@@ -146,8 +147,11 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     }
 
     //TODO: check if normalizer correct
-    float normalizer = sumOfObservedCounts*kmerError; // /Si.size();
-
+    float default_normalizer = sumOfObservedCounts*kmerError/Si.size();
+    float orig_normalizer = sumOfObservedCounts*kmerError/(*kmer_wrap_ptr.get()).observedCounts.size();
+    float another_normalizer = sumOfObservedCounts*kmerError;
+    float normalizer = another_normalizer;
+    std::cout << another_normalizer << " another_normalizer; " << default_normalizer << " default normalizer; " << orig_normalizer << " orig normalizer;\n";
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
     // BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
