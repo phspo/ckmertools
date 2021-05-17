@@ -146,7 +146,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     }
 
     //TODO: check if normalizer correct
-    float normalizer = sumOfObservedCounts*kmerError/assumedErrorKmers.size(); // / Si.size();
+    float normalizer = sumOfObservedCounts*kmerError*Si.size();
 
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
