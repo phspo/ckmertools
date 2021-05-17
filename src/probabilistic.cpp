@@ -32,7 +32,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
     else {
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
-        expectedCount = 0.0000001;
+        expectedCount = 0.00001;
         std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
         if(hd_kmer.size() < Si.size()) {
             std::map<std::string, int>::iterator it;
@@ -43,7 +43,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                 float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
                 float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
 
-                expectedCount += a_hd*e_i;
+                expectedCount += a_hd*e_i*normalizer;
             }
         } else {
             for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
@@ -150,7 +150,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     float default_normalizer = sumOfObservedCounts*kmerError/Si.size();
     float orig_normalizer = sumOfObservedCounts*kmerError/(*kmer_wrap_ptr.get()).observedCounts.size();
     float another_normalizer = sumOfObservedCounts*kmerError;
-    float normalizer = default_normalizer*100;
+    float normalizer = default_normalizer*10;
     std::cout << another_normalizer << " another_normalizer; " << default_normalizer << " default normalizer; " << orig_normalizer << " orig normalizer;\n";
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
