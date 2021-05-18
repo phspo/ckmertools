@@ -57,7 +57,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                 }
             }
         }
-        std::cout << expectedCount << " result; " << normalizer << " normalizer;\n";
+        //std::cout << expectedCount << " result; " << normalizer << " normalizer;\n";
         expectedCount = expectedCount;
     }
 
@@ -148,10 +148,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
 
     //TODO: check if normalizer correct
     float default_normalizer = sumOfObservedCounts*kmerError/Si.size();
-    float orig_normalizer = sumOfObservedCounts*kmerError/(*kmer_wrap_ptr.get()).observedCounts.size();
-    float another_normalizer = sumOfObservedCounts*kmerError;
-    float normalizer = default_normalizer/2;
-    std::cout << another_normalizer << " another_normalizer; " << default_normalizer << " default normalizer; " << orig_normalizer << " orig normalizer;\n";
+    float normalizer = default_normalizer;
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
     // BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
