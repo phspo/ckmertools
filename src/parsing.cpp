@@ -48,6 +48,37 @@ std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistances(
     return hamming_distances;
 }
 
+// distances_file = "V_kmer_distances.npz";     kmers_idx_file="V_kmers.json"
+std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistancesO(std::string distances_file, std::string kmers_idx_fileO, std::string kmers_idx_fileV) {
+    cnpy::npz_t M = cnpy::npz_load(distances_file);
+    std::vector<uint8_t> M_data = M["data"].as_vec<uint8_t>();
+    std::vector<int> M_i = M["col"].as_vec<int>();
+    std::vector<int> M_j = M["row"].as_vec<int>();
+    std::vector<int> M_shape = M["shape"].as_vec<int>();
+
+    Json::Value V_kmers_index_json = parsing::readDictionary(kmers_idx_fileV);
+    Json::Value O_kmers_index_json = parsing::readDictionary(kmers_idx_fileO);
+    std::vector<std::string> V_kmers_index;
+    int idx = 0;
+    for(Json::Value::const_iterator kmer=V_kmers_index_json.begin(); kmer!=V_kmers_index_json.end(); ++kmer, ++ idx ) {
+        V_kmers_index.push_back(kmer->asString());
+    }
+    std::vector<std::string> O_kmers_index;
+    idx = 0;
+    for(Json::Value::const_iterator kmer=O_kmers_index_json.begin(); kmer!=O_kmers_index_json.end(); ++kmer, ++ idx ) {
+        O_kmers_index.push_back(kmer->asString());
+    }
+    std::map<std::string, std::map<std::string, int>> hamming_distances;
+    for (int i = 0; i < M_data.size(); i++) {
+        std::string id_x = O_kmers_index[M_i[i]];
+        std::string id_y = V_kmers_index[M_j[i]];
+        hamming_distances[id_x][id_y] = M_data[i];
+    }
+    // example for hd
+    //std::cout << "TEST:" << std::to_string(hamming_distances["TTTTTGCCAGGCTTGTTGTTGTCTTCTTTACCAGGCTT"]["TTTTTGCCAGGCTTGTTATTGTCTTCTTTGCCAGGCTT"]) << std::endl;
+    return hamming_distances;
+}
+
 std::unordered_set<std::string> parsing::get_V(Json::Value &expectedCounts) {
     std::unordered_set<std::string> V;
     for (Json::Value::const_iterator spaType = expectedCounts.begin(); spaType != expectedCounts.end(); ++spaType) {
