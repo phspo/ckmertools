@@ -34,6 +34,8 @@ using namespace boost::program_options;
                 ("itersetType,i",value<std::string>(),"Iterset Type O, V, OuV or OnV")
                 ("hammingdist,h",value<std::string>(),"path to the hammingdistance npz file")
                 ("kmersindex,j",value<std::string>(),"path to the kmers json file")
+                ("ohammingdist,x",value<std::string>(),"path to the hammingdistance npz file")
+                ("okmersindex,z",value<std::string>(),"path to the kmers json file")
         ;
         variables_map vm;
         store(parse_command_line(argc, argv, desc), vm);
@@ -60,7 +62,10 @@ using namespace boost::program_options;
             vm["observed"].as<std::string>(),
             vm["expected"].as<std::string>(), 
             vm["itersetType"].as<std::string>(),
-            kmerError);
+            kmerError,
+            vm["ohammingdist"].as<std::string>(),
+            vm["okmersindex"].as<std::string>()
+            );
 
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << kmer_wrap_ptr.get() << ", kmer_wrap_ptr.get() \n";
             // BOOST_LOG_TRIVIAL(info) << "INITIAL PTR for kmerwrap: " << &(*kmer_wrap_ptr.get()) << ", &(*kmer_wrap_ptr.get()) \n";

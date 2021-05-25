@@ -17,6 +17,7 @@ class KmersWrapper {
 
     public:
     std::map<std::string, std::map<std::string, int>> hamming_distance_matrix;
+    std::map<std::string, std::map<std::string, int>> ohamming_distance_matrix;
     Json::Value observedCounts;
     Json::Value expectedCounts;
     std::unordered_set<std::string> V;
@@ -24,7 +25,7 @@ class KmersWrapper {
     std::unordered_set<std::string> iterset;
     std::string itersetType;
 
-    KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError);
+    KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError, std::string ohammingdist, std::string okmersindex);
     ~KmersWrapper();
     std::map<std::string, int> get_hamming_distances(std::string kmer);
     int get_hamming_distance(std::string kmer1,std::string kmer2);

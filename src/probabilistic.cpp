@@ -33,7 +33,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
         expectedCount = 0.00001;
-        std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).hamming_distance_matrix[kmer];
+        std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).get_hamming_distances(kmer);
         if(hd_kmer.size() < Si.size()) {
             std::map<std::string, int>::iterator it;
             for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
