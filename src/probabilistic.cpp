@@ -37,13 +37,15 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
         if(hd_kmer.size() < Si.size()) {
             std::map<std::string, int>::iterator it;
             for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
-                // if kmer in Si
                 std::string target_kmer = it->first;
-                int hd = it->second;                                                        // = hamming distance(kmer, target_kmer)
-                float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
-                float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
+                // if kmer in Si    
+                if(Si.find(target_kmer) != Si.end()) {    
+                    int hd = it->second;                                                        // = hamming distance(kmer, target_kmer)
+                    float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
+                    float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
 
-                expectedCount += a_hd*e_i*normalizer;
+                    expectedCount += a_hd*e_i*normalizer;
+                }
             }
         } else {
             for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
