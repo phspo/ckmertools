@@ -33,7 +33,7 @@ using namespace boost::program_options;
                 ("unexpected,u",value<std::string>()->required(),"Unexpected kmers file")
                 ("itersetType,i",value<std::string>()->required(),"Iterset Type O, V, OuV or OnV")
                 ("hammingdist,h",value<std::string>()->required(),"path to the hammingdistance npz file")
-                ("ukmersindex,j",value<std::string>()->required(),"path to the kmers json file")
+                ("ukmersindex,j",value<std::string>(),"path to the kmers json file")
                 ("vkmersindex,x",value<std::string>()->required(),"path to the kmers json file")
                 ("ohammingdist,y",value<std::string>()->required(),"path to the hammingdistance npz file")
                 ("okmersindex,z",value<std::string>()->required(),"path to the kmers json file")
@@ -58,9 +58,13 @@ using namespace boost::program_options;
 
             float kmerError = vm["kmererror"].as<float>();
             std::cout <<"Init KmersWrapper \n";
+            std::string ukmersindex = "";
+            if (vm.count("ukmersindex")) {
+                ukmersindex = vm["ukmersindex"].as<std::string>();
+            }
             std::shared_ptr<KmersWrapper> kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
             vm["vkmersindex"].as<std::string>(),
-            vm["ukmersindex"].as<std::string>(),
+            ukmersindex,
             vm["observed"].as<std::string>(),
             vm["expected"].as<std::string>(), 
             vm["itersetType"].as<std::string>(),

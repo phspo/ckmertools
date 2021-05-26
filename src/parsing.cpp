@@ -1,4 +1,5 @@
 #include "parsing.h"
+#include <fstream>
 
 Json::Value parsing::readDictionary(const std::string &filePath) {
     std::ifstream ifs(filePath);
@@ -95,10 +96,16 @@ std::unordered_set<std::string> parsing::get_V(Json::Value &expectedCounts) {
 }
 
 std::unordered_set<std::string> parsing::get_U(std::string U_kmers) {
-    Json::Value kmers = readDictionary(U_kmers);
     std::unordered_set<std::string> U;
-    for (Json::Value::const_iterator kmer = kmers.begin(); kmer != kmers.end(); ++kmer) {
-        U.insert(kmer.key().asString());
+    if(U_kmers=="") {
+        return U;
+    }
+    std::ifstream infile(U_kmers);
+
+    std::string a;
+    while (infile >> a)
+    {
+        U.insert(a);
     }
     return U;
 }
