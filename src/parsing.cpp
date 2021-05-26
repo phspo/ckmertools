@@ -50,6 +50,7 @@ std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistances(
 
 // distances_file = "V_kmer_distances.npz";     kmers_idx_file="V_kmers.json"
 std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistancesO(std::string distances_file, std::string kmers_idx_fileO, std::string kmers_idx_fileV) {
+    std::cout <<'start get_hammingdistancesO \n';
     cnpy::npz_t M = cnpy::npz_load(distances_file);
     std::vector<uint8_t> M_data = M["data"].as_vec<uint8_t>();
     std::vector<int> M_i = M["col"].as_vec<int>();

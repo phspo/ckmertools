@@ -56,7 +56,7 @@ using namespace boost::program_options;
             Json::Value expectedCounts = parsing::readDictionary(vm["expected"].as<std::string>());
 
             float kmerError = vm["kmererror"].as<float>();
-            
+            std::cout <<'Init KmersWrapper \n';
             std::shared_ptr<KmersWrapper> kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
             vm["kmersindex"].as<std::string>(),
             vm["observed"].as<std::string>(),
