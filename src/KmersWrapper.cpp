@@ -5,10 +5,10 @@
 
 
 std::map<std::string, int> KmersWrapper::get_hamming_distances(std::string kmer) {
-    if (hamming_distance_matrix.find(kmer) != hamming_distance_matrix.end()) {
-        return KmersWrapper::hamming_distance_matrix[kmer];
-    }
-    return KmersWrapper::ohamming_distance_matrix[kmer]; 
+    //if (hamming_distance_matrix.find(kmer) != hamming_distance_matrix.end()) {
+    return KmersWrapper::hamming_distance_matrix[kmer];
+    //}
+    //return KmersWrapper::ohamming_distance_matrix[kmer]; 
 }
 
 int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
