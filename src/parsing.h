@@ -16,6 +16,7 @@ namespace parsing {
     std::map<std::string, std::map<std::string, int>> get_hammingdistances(std::string distances_file, std::string kmers_idx_file);
     std::map<std::string, std::map<std::string, int>> get_hammingdistancesO(std::string distances_file, std::string kmers_idx_fileO, std::string kmers_idx_fileV);
     std::unordered_set<std::string> get_V(Json::Value &expectedCounts);
+    std::unordered_set<std::string> get_U(std::string V_kmers);
     std::unordered_set<std::string> get_O(Json::Value &observedCounts);
 };
 

@@ -30,13 +30,13 @@ using namespace boost::program_options;
                 ("deviationcutoff,d",value<int>(),"Discard any type with kmer differences exceeding the cutoff value")
                 ("m",value<int>()->required(),"Mode, [0] for coverage-based, [1] for generative")
                 ("target,t",value<std::string>()->required(),"Target file")
-                ("unexpected,u",value<std::string>(),"Unexpected kmers file")
-                ("itersetType,i",value<std::string>(),"Iterset Type O, V, OuV or OnV")
-                ("hammingdist,h",value<std::string>(),"path to the hammingdistance npz file")
-                ("ukmersindex,j",value<std::string>(),"path to the kmers json file")
-                ("vkmersindex,x",value<std::string>(),"path to the kmers json file")
-                ("ohammingdist,y",value<std::string>(),"path to the hammingdistance npz file")
-                ("okmersindex,z",value<std::string>(),"path to the kmers json file")
+                ("unexpected,u",value<std::string>()->required(),"Unexpected kmers file")
+                ("itersetType,i",value<std::string>()->required(),"Iterset Type O, V, OuV or OnV")
+                ("hammingdist,h",value<std::string>()->required(),"path to the hammingdistance npz file")
+                ("ukmersindex,j",value<std::string>()->required(),"path to the kmers json file")
+                ("vkmersindex,x",value<std::string>()->required(),"path to the kmers json file")
+                ("ohammingdist,y",value<std::string>()->required(),"path to the hammingdistance npz file")
+                ("okmersindex,z",value<std::string>()->required(),"path to the kmers json file")
         ;
         variables_map vm;
         store(parse_command_line(argc, argv, desc), vm);
@@ -59,7 +59,8 @@ using namespace boost::program_options;
             float kmerError = vm["kmererror"].as<float>();
             std::cout <<"Init KmersWrapper \n";
             std::shared_ptr<KmersWrapper> kmer_wrap_ptr = std::make_shared<KmersWrapper>(vm["hammingdist"].as<std::string>(),
-            vm["kmersindex"].as<std::string>(),
+            vm["vkmersindex"].as<std::string>(),
+            vm["ukmersindex"].as<std::string>(),
             vm["observed"].as<std::string>(),
             vm["expected"].as<std::string>(), 
             vm["itersetType"].as<std::string>(),

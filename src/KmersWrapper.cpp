@@ -16,13 +16,14 @@ int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
 }
 
 
-KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std::string observed, std::string expected, std::string itype, float kmerError, std::string ohammingdist, std::string okmersindex) {
+KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std::string ukmersindex, std::string observed, std::string expected, std::string itype, float kmerError, std::string ohammingdist, std::string okmersindex) {
     hamming_distance_matrix = parsing::get_hammingdistances(hammingdist, kmersindex);
     std::cout <<"Init ohamming_distance_matrix \n";
     ohamming_distance_matrix = parsing::get_hammingdistancesO(ohammingdist, okmersindex, kmersindex);
     observedCounts = parsing::readDictionary(observed);
     expectedCounts = parsing::readDictionary(expected);
     V = parsing::get_V(expectedCounts);
+    U = parsing::get_U(ukmersindex);
     O = parsing::get_O(observedCounts);
     itersetType = itype;
     iterset = getIterset();

@@ -94,6 +94,15 @@ std::unordered_set<std::string> parsing::get_V(Json::Value &expectedCounts) {
     return V;
 }
 
+std::unordered_set<std::string> parsing::get_U(std::string U_kmers) {
+    Json::Value kmers = readDictionary(U_kmers);
+    std::unordered_set<std::string> U;
+    for (Json::Value::const_iterator kmer = kmers.begin(); kmer != kmers.end(); ++kmer) {
+        U.insert(kmer.key().asString());
+    }
+    return U;
+}
+
 std::unordered_set<std::string> parsing::get_O(Json::Value &observedCounts) {
     std::unordered_set<std::string> O;
     for (Json::Value::const_iterator kmer = observedCounts.begin(); kmer != observedCounts.end(); ++kmer) {
