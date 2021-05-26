@@ -33,8 +33,9 @@ using namespace boost::program_options;
                 ("unexpected,u",value<std::string>(),"Unexpected kmers file")
                 ("itersetType,i",value<std::string>(),"Iterset Type O, V, OuV or OnV")
                 ("hammingdist,h",value<std::string>(),"path to the hammingdistance npz file")
-                ("kmersindex,j",value<std::string>(),"path to the kmers json file")
-                ("ohammingdist,x",value<std::string>(),"path to the hammingdistance npz file")
+                ("ukmersindex,j",value<std::string>(),"path to the kmers json file")
+                ("vkmersindex,x",value<std::string>(),"path to the kmers json file")
+                ("ohammingdist,y",value<std::string>(),"path to the hammingdistance npz file")
                 ("okmersindex,z",value<std::string>(),"path to the kmers json file")
         ;
         variables_map vm;
