@@ -70,8 +70,6 @@ std::map<std::string, std::map<std::string, int>> parsing::get_hammingdistancesO
         O_kmers_index.push_back(kmer->asString());
     }
     std::cout <<"begin hd write \n";
-    std::cout << M_i.size() << "cols \n";
-    std::cout << M_j.size() << "rows \n";
     std::map<std::string, std::map<std::string, int>> hamming_distances;
     for (int i = 0; i < M_data.size(); i++) {
         std::string id_x = O_kmers_index[M_j[i]];

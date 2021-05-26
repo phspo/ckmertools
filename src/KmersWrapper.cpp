@@ -5,10 +5,10 @@
 
 
 std::map<std::string, int> KmersWrapper::get_hamming_distances(std::string kmer) {
-    //if (hamming_distance_matrix.find(kmer) != hamming_distance_matrix.end()) {
-    return KmersWrapper::hamming_distance_matrix[kmer];
-    //}
-    //return KmersWrapper::ohamming_distance_matrix[kmer]; 
+    if (hamming_distance_matrix.find(kmer) != hamming_distance_matrix.end()) {
+        return KmersWrapper::hamming_distance_matrix[kmer];
+    }
+    return KmersWrapper::ohamming_distance_matrix[kmer]; 
 }
 
 int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
@@ -39,6 +39,7 @@ enum ItersetOptions {
     InvalidType,
     OType,
     VType,
+    UType,
     OuVType,
     OnVType
 };
@@ -46,6 +47,7 @@ enum ItersetOptions {
 ItersetOptions resolveItersetOption(std::string &input) {
     if( input == "O" ) return OType;
     if( input == "V" ) return VType;
+    if( input == "U" ) return UType;
     if( input == "OuV" ) return OuVType;
     if( input == "OnV" ) return OnVType;
     return InvalidType;
@@ -77,6 +79,9 @@ std::unordered_set<std::string> KmersWrapper::getIterset() {
         }
         case VType: {
             return V;
+        }
+        case UType: {
+            return U;
         }
         case OuVType: {
             // O Union V
