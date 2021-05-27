@@ -95,6 +95,16 @@ bool a_subset_of_b(std::unordered_set<std::string> &a, std::unordered_set<std::s
     return true;
 }
 
+std::unordered_set<std::string> relative_complement(std::unordered_set<std::string> &a, std::unordered_set<std::string> &b) {
+    std::set<std::string> orda(a.begin(), a.end());
+    std::set<std::string> ordb(b.begin(), b.end());
+    std::unordered_set <std::string> anb;
+    std::unordered_set <std::string> adiffanb;
+    std::set_intersection(orda.begin(), orda.end(), ordb.begin(), ordb.end(), std::inserter(anb, anb.begin()));
+    std::set_difference(orda.begin(), orda.end(), ordb.begin(), ordb.end(), std::inserter(adiffanb, adiffanb.begin()));
+    return adiffanb;
+}
+
 probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBased(
             int threadID,
             const std::shared_ptr<KmersWrapper> kmer_wrap_ptr,
@@ -141,7 +151,12 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     //    result.errorLikelihood = NAN;
     //    return result;
     //}
-
+    // Ignore spatypes wich dont have enough kmers with O in common
+    if (relative_complement(Si, (*kmer_wrap_ptr.get()).O).size()>10) { //not found
+        result.likelihood = NAN;
+        result.errorLikelihood = NAN;
+        return result;
+    }
     //Calculate default value for expected counts
     int sumOfObservedCounts = 0;
     for(Json::Value::const_iterator kmer=(*kmer_wrap_ptr.get()).observedCounts.begin(); kmer!=(*kmer_wrap_ptr.get()).observedCounts.end(); ++kmer) {
