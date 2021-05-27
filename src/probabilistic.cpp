@@ -134,13 +134,13 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         }
     }
 
-    // TODO: WHAT HAPPEND HERE? REPLACE O WITH itersetPointer ?
+    // TODO: REMOVE??
     //Sanity Check: If an expected k-mer is not observed at all we discard this type instantly
-    if (not (a_subset_of_b(Si, (*kmer_wrap_ptr.get()).O))) { //not found
-        result.likelihood = NAN;
-        result.errorLikelihood = NAN;
-        return result;
-    }
+    //if (not (a_subset_of_b(Si, (*kmer_wrap_ptr.get()).O))) { //not found
+    //    result.likelihood = NAN;
+    //    result.errorLikelihood = NAN;
+    //    return result;
+    //}
 
     //Calculate default value for expected counts
     int sumOfObservedCounts = 0;
