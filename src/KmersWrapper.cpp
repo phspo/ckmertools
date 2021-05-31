@@ -27,12 +27,12 @@ KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std:
     O = parsing::get_O(observedCounts);
     itersetType = itype;
     iterset = getIterset();
-    a = (float *) malloc(5*sizeof(float));
+    l = (float *) malloc(5*sizeof(float));
     pre_compute_hd_probabilities(kmerError, 5);
 };
 
 KmersWrapper::~KmersWrapper() {
-    delete a;
+    delete l;
 };
 
 enum ItersetOptions {
@@ -55,17 +55,19 @@ ItersetOptions resolveItersetOption(std::string &input) {
 
 void KmersWrapper::pre_compute_hd_probabilities(float kmerError, int max_hd) {
     int length_kmer = (*begin(O)).length();
-    a[0] = (float) 1;
+    l[0] = (float) 1;
     for (int i = 1; i < max_hd; i++)
     {
         //TODO: replace with mutation rate
         // i is hamming distance
-        a[i] = std::pow(kmerError,i)*std::pow((1 - kmerError),(length_kmer - i));
+        int b = kmerError/(kmerError+1);
+        int a = b/length_kmer;
+        l[i] = std::pow(a,i)*std::pow((1 - a),(length_kmer - i));
     }
 }
 
 float KmersWrapper::get_computed_probability(int i) {
-    return a[i];
+    return l[i];
 }
 
 std::unordered_set<std::string> KmersWrapper::getIterset() {

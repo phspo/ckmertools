@@ -13,7 +13,7 @@ class KmersWrapper {
     private:
     std::unordered_set<std::string> getIterset();
     void pre_compute_hd_probabilities(float kmerError, int max_hd);
-    float* a;
+    float* l;
 
     public:
     std::map<std::string, std::map<std::string, int>> hamming_distance_matrix;
