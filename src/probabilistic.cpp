@@ -164,8 +164,9 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     }
 
     //TODO: check if normalizer correct
+    float old_normalizer =sumOfObservedCounts * kmerError / assumedErrorKmers.size();
     float default_normalizer = sumOfObservedCounts*kmerError/Si.size();
-    float normalizer = default_normalizer;
+    float normalizer = old_normalizer;
     // |O|*e/|Uo|
     // float expectedDefaultValue = sumOfObservedCounts * kmerError / assumedErrorKmers.size();
     // BOOST_LOG_TRIVIAL(info) << spaTypeName << "\t" << expectedDefaultValue << "\n";
