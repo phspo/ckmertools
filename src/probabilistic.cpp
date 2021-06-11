@@ -45,11 +45,11 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                     float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
                     float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
 
-                    expectedCount += a_hd*e_i*normalizer;
-                    //int current = a_hd*e_i;
-                    //if(foundmaxexpectedcount < current) {
-                    //    foundmaxexpectedcount = current;
-                    //}
+                    //expectedCount += a_hd*e_i*normalizer;
+                    int current = a_hd*e_i*normalizer;
+                    if(foundmaxexpectedcount < current) {
+                        foundmaxexpectedcount = current;
+                    }
                 }
             }
         } else {
@@ -60,11 +60,11 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                     float e_i = expectedCounts.get(*sikmer,0).asFloat();                    // = |sikmer|
                     float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
 
-                    expectedCount += a_hd*e_i*normalizer;
-                    // int current = a_hd*e_i;
-                    // if(foundmaxexpectedcount < current) {
-                    //     foundmaxexpectedcount = current;
-                    // }
+                    //expectedCount += a_hd*e_i*normalizer;
+                    int current = a_hd*e_i*normalizer;
+                    if(foundmaxexpectedcount < current) {
+                        foundmaxexpectedcount = current;
+                    }
                 }
             }
         }
