@@ -34,6 +34,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
         expectedCount = 0.01;
         int foundmaxexpectedcount = 0;
+        bool METHOD_MAX = true;
         std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).get_hamming_distances(kmer);
         std::map<std::string, int>::iterator it;
         for ( it = hd_kmer.begin(); it != hd_kmer.end(); it++) {
@@ -44,10 +45,13 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                 float e_i = expectedCounts.get(target_kmer,0).asFloat();                    // = |target_kmer|
                 float a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));         // = a^hd * (1-a)^(len-hd)
 
-                //expectedCount += a_hd*e_i*normalizer;
-                int current = a_hd*e_i*normalizer;
-                if(foundmaxexpectedcount < current) {
-                    foundmaxexpectedcount = current;
+                if(METHOD_MAX) {
+                    int current = a_hd*e_i*normalizer;
+                    if(foundmaxexpectedcount < current) {
+                        foundmaxexpectedcount = current;
+                    }
+                } else {
+                    expectedCount += a_hd*e_i*normalizer;
                 }
             }
         }
@@ -144,11 +148,20 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
     //    return result;
     //}
     // Ignore spatypes wich dont have enough kmers with O in common
-    if (relative_complement(Si, (*kmer_wrap_ptr.get()).O).size()>3) { //not found
+    std::unordered_set<std::string> rc = relative_complement(Si, (*kmer_wrap_ptr.get()).O);
+    if (rc.size()>3) { //not found
         result.likelihood = NAN;
         result.errorLikelihood = NAN;
         return result;
     }
+    // Other idea: allow to remove few kmers from spatype when unobserved.
+    bool REMOVE_BAD_KMERS = true;
+    if(REMOVE_BAD_KMERS) {
+        std::unordered_set<std::string> tmp;
+        std::set_difference(Si.begin(),Si.end(),rc.begin(),rc.end(),std::inserter(tmp, tmp.begin()));
+        Si = tmp;
+    }
+
     //Calculate default value for expected counts
     int sumOfObservedCounts = 0;
     for(Json::Value::const_iterator kmer=(*kmer_wrap_ptr.get()).observedCounts.begin(); kmer!=(*kmer_wrap_ptr.get()).observedCounts.end(); ++kmer) {
