@@ -68,7 +68,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                 }
             }
         }
-        //expectedCount += foundmaxexpectedcount*normalizer;
+        expectedCount += foundmaxexpectedcount*normalizer;
         //std::cout << expectedCount << " result; " << normalizer << " normalizer;\n";
     }
 
