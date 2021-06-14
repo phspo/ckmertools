@@ -42,8 +42,8 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
             if ( hd_kmer.count(*sikmer) > 0) {    
                 // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
                 int hd = hd_kmer[*sikmer];
-                std::cout << kmer << " kmer; " << *sikmer << " *sikmer;\n";  
-                std::cout << hd << " hd;\n";                                              // = hamming distance(kmer, sikmer)
+                //std::cout << kmer << " kmer; " << *sikmer << " *sikmer;\n";  
+                //std::cout << hd << " hd;\n";                                              // = hamming distance(kmer, sikmer)
                 double e_i = expectedCounts.get(*sikmer,0).asDouble();                    // = |sikmer|
                 double a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
 
