@@ -49,7 +49,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
 
                 if(METHOD_MAX) {
                     int current = a_hd*e_i*normalizer;
-                    std::cout << current << " current; " << a_hd << " a_hd; " << e_i << " e_i;\n";
+                    //std::cout << current << " current; " << a_hd << " a_hd; " << e_i << " e_i;\n";
                     if(foundmaxexpectedcount < current) {
                         foundmaxexpectedcount = current;
                     }
