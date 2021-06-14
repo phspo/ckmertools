@@ -36,10 +36,8 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
         int foundmaxexpectedcount = 0;
         bool METHOD_MAX = true;
         std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).get_hamming_distances(kmer);
-        std::map<std::string, int>::iterator it;
 
         for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
-            std::string target_kmer = it->first;
             // if kmer in Si and has small hd    
             if ( hd_kmer.count(*sikmer) > 0 ) {    
                 // a^hd * (1-a)^(len-hd) * |sikmer| when hd small enough
