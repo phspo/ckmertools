@@ -55,7 +55,7 @@ ItersetOptions resolveItersetOption(std::string &input) {
 
 void KmersWrapper::pre_compute_hd_probabilities(float kmerError, int max_hd) {
     int length_kmer = (*begin(O)).length();
-    double kE = (double) kmerError
+    double kE = (double) kmerError;
     l[0] = (double) 1;
     int b = kE/(kE+1);
     for (int i = 1; i < max_hd; i++)
