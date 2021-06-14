@@ -18,10 +18,6 @@ int KmersWrapper::get_hamming_distance(std::string kmer1,std::string kmer2){
 
 KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std::string ukmersindex, std::string observed, std::string expected, std::string itype, float kmerError, std::string ohammingdist, std::string okmersindex) {
     hamming_distance_matrix = parsing::get_hammingdistances(hammingdist, kmersindex);
-    std::cout << hamming_distance_matrix["AAAAAAAAACCTGGCAAAGAAGACGGCAACAAACCTGG"]["AAAAAAAAACCTGGTAAAGAAGACAACAAAAAACCTGG"] << " (0, 1) \n";
-    std::cout << hamming_distance_matrix["AAAAAAAAACCTGGTAAAGAAGACAACAAAAAACCTGG"]["AAAAAAAAACCTGGCAAAGAAGACGGCAACAAACCTGG"] << " (1, 0) \n";
-    std::cout << hamming_distance_matrix["AAAAAAAAACCTGGCAAAGAAGACGGCAACAAACCTGG"]["AAAAAAAAACCTGGTAAAGAAGACAACAACAAACCTGG"] << " (0, 2) \n";
-    std::cout << hamming_distance_matrix["AAAAAAAAACCTGGCAAAGAAGACGGCAACAAACCTGG"]["AAAAACAAACCTGGTAAAGAAGACGGCAACAAGCCTGG"] << " (0, 509) \n"; 
     std::cout << "Init ohamming_distance_matrix \n";
     ohamming_distance_matrix = parsing::get_hammingdistancesO(ohammingdist, okmersindex, kmersindex);
     observedCounts = parsing::readDictionary(observed);
@@ -31,7 +27,7 @@ KmersWrapper::KmersWrapper(std::string hammingdist, std::string kmersindex, std:
     O = parsing::get_O(observedCounts);
     itersetType = itype;
     iterset = getIterset();
-    l = (float *) malloc(5*sizeof(float));
+    l = (double *) malloc(5*sizeof(double));
     pre_compute_hd_probabilities(kmerError, 5);
 };
 
