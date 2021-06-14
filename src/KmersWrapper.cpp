@@ -57,13 +57,13 @@ void KmersWrapper::pre_compute_hd_probabilities(float kmerError, int max_hd) {
     int length_kmer = (*begin(O)).length();
     double kE = (double) kmerError;
     l[0] = (double) 1;
-    int b = kE/(kE+1);
+    double b = kE/(kE+1);
     for (int i = 1; i < max_hd; i++)
     {
         //TODO: replace with mutation rate
         // i is hamming distance
         l[i] = std::pow(b,i)*kE;
-        std::cout << b << " b; " << kE << " kmerError; "<< l[i] << " l[i];\n";
+        //std::cout << b << " b; " << kE << " kmerError; "<< l[i] << " l[i];\n";
     }
 }
 
