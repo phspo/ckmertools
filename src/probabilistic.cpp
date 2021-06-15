@@ -18,10 +18,10 @@ int probabilistic::hamming_distance(std::string s1, std::string s2){
     return count;
 }
 
-float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<KmersWrapper> kmer_wrap_ptr, std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer, float normalizer) {
+double get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<KmersWrapper> kmer_wrap_ptr, std::string kmer, const Json::Value &expectedCounts, bool isExpectedKmer, float normalizer) {
     //Use expectation value if available
     BOOST_LOG_TRIVIAL(info) << "get_expected_count \n";
-    float expectedCount = 0;
+    double expectedCount = 0;
     if (isExpectedKmer){
         expectedCount = expectedCounts.get(kmer,-1).asFloat();
         if (expectedCount == -1){
@@ -33,8 +33,8 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
         // expectedCount = expectedDefaultValue; //Default value for non-expected but observed kmers is the previously calculated value
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
         expectedCount = 0.01;
-        int foundmaxexpectedcount = 0;
-        bool METHOD_MAX = true;
+        double foundmaxexpectedcount = 0;
+        bool METHOD_MAX = false;
         std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).get_hamming_distances(kmer);
 
         for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
@@ -48,7 +48,7 @@ float get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<Km
                 double a_hd = ((*kmer_wrap_ptr.get()).get_computed_probability(hd));     // = a^hd * (1-a)^(len-hd)
 
                 if(METHOD_MAX) {
-                    int current = a_hd*e_i*normalizer;
+                    double current = a_hd*e_i*normalizer;
                     //std::cout << current << " current; " << a_hd << " a_hd; " << e_i << " e_i;\n";
                     if(foundmaxexpectedcount < current) {
                         foundmaxexpectedcount = current;
@@ -190,7 +190,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
             observedErrors += 1;
         }
         int observedCount = get_observation_count(*kmer, (*kmer_wrap_ptr.get()).observedCounts);
-        float expectedCount = get_expected_count(Si, kmer_wrap_ptr, *kmer, expectedCounts, isExpectedKmer, normalizer);
+        double expectedCount = get_expected_count(Si, kmer_wrap_ptr, *kmer, expectedCounts, isExpectedKmer, normalizer);
 
         if (SINGLE_ERROR_TERM && !isExpectedKmer){
             //kmer is an error and not taken into account as a single term
