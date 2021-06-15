@@ -158,7 +158,7 @@ probabilistic::CoverageBasedResult probabilistic::calculateLikelihoodCoverageBas
         return result;
     }
     // Other idea: allow to remove few kmers from spatype when unobserved.
-    bool REMOVE_BAD_KMERS = true;
+    bool REMOVE_BAD_KMERS = false;
     if(REMOVE_BAD_KMERS) {
         std::unordered_set<std::string> tmp;
         std::set_difference(Si.begin(),Si.end(),rc.begin(),rc.end(),std::inserter(tmp, tmp.begin()));
