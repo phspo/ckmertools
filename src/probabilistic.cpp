@@ -34,7 +34,7 @@ double get_expected_count(std::unordered_set<std::string> &Si, std::shared_ptr<K
         // iterrate through all spatype kmers add a^hd * (1-a)^(len-hd) when hd small enough
         expectedCount = 0.01;
         double foundmaxexpectedcount = 0;
-        bool METHOD_MAX = false;
+        bool METHOD_MAX = true;
         std::map<std::string, int> hd_kmer = (*kmer_wrap_ptr.get()).get_hamming_distances(kmer);
 
         for (std::unordered_set<std::string>::const_iterator sikmer = Si.begin(); sikmer != Si.end(); sikmer++){
